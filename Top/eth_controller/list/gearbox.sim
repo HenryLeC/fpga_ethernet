@@ -1,0 +1,14 @@
+# Simulator xsim
+
+[properties]
+ACTIVE=1
+RUNTIME=10us
+TOP=TB_gearbox
+XSIM.SIMULATE.RUNTIME=10us
+
+[files]
+sim/gearbox/tb_gearbox.sv
+
+
+[hog]
+HOG_SIMPASS_STR="Simulation Passed"
