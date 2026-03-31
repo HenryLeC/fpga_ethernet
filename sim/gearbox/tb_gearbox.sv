@@ -17,7 +17,8 @@ module TB_gearbox();
     end
 
     always #1 begin
-        if (led == 4'h1) begin
+        if (led == 4'hF) begin
+            $info("Simulation Passed");
             $finish();
         end
     end

@@ -1,9 +1,9 @@
 module gearbox #(
-    parameter COUNT_WIDTH = 12;
+    parameter COUNT_WIDTH = 12
 ) (
     input wire clk,
     input wire arst_n,
-    output wire [3:0] led
+    output reg [3:0] led
 );
     reg [COUNT_WIDTH-1:0] counter;
 
