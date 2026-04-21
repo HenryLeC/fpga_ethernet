@@ -97,3 +97,9 @@ _info
 **.qdb
 **.qpg
 **.qtl
+
+# Cocotb
+.pytest_cache
+sim_build/
+venv
+*.fst

@@ -10,13 +10,13 @@ module gearbox #(
 
     always_ff @(posedge clk or negedge arst_n) begin
         if (!arst_n) begin
-            counter <= 1'b0;
+            counter <= 'b0;
         end else begin
             counter <= counter + 1'b1;
         end
     end
 
     always_comb begin : led_out
-        led = counter[COUNT_WIDTH-1:COUNT_WIDTH-5];
+        led = counter[COUNT_WIDTH-1:COUNT_WIDTH-4];
     end
 endmodule
