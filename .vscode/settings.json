@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        "vivado*.{log,jou}": true
+    },
+    "verilog.linting.verilator.arguments": "-y /opt/Vivado/2025.2/data/verilog/src/ -y /opt/Vivado/2025.2/data/verilog/src/unisims/ +incdir+/opt/Vivado/2025.2/data/verilog/src/",
+    "makefile.configureOnOpen": false,
+    "cSpell.words": [
+        "arst",
+        "cocotb",
+        "negedge",
+        "verilator"
+    ]
+}
