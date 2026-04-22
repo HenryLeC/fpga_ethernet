@@ -1,24 +1,132 @@
-module scrambler #(
-    parameter LFSR_WIDTH = 58,
-    parameter LFSR_POLYNOMIAL = 58'h8000000001
-) (
-    input clk,
-    input arst_n,
-    input data,
-    output reg scrambled_data
+module scrambler (
+    input [63:0] data_in,
+    input [57:0] lfsr_state_in,
+    output [63:0] data_out,
+    output [57:0] lfsr_state_out
 );
 
-    reg [LFSR_WIDTH-1:0] lfsr_state;
+    assign data_out[0] = data_in[0]^lfsr_state_in[38]^lfsr_state_in[57];
+    assign data_out[1] = data_in[1]^lfsr_state_in[37]^lfsr_state_in[56];
+    assign data_out[2] = data_in[2]^lfsr_state_in[36]^lfsr_state_in[55];
+    assign data_out[3] = data_in[3]^lfsr_state_in[35]^lfsr_state_in[54];
+    assign data_out[4] = data_in[4]^lfsr_state_in[34]^lfsr_state_in[53];
+    assign data_out[5] = data_in[5]^lfsr_state_in[33]^lfsr_state_in[52];
+    assign data_out[6] = data_in[6]^lfsr_state_in[32]^lfsr_state_in[51];
+    assign data_out[7] = data_in[7]^lfsr_state_in[31]^lfsr_state_in[50];
+    assign data_out[8] = data_in[8]^lfsr_state_in[30]^lfsr_state_in[49];
+    assign data_out[9] = data_in[9]^lfsr_state_in[29]^lfsr_state_in[48];
+    assign data_out[10] = data_in[10]^lfsr_state_in[28]^lfsr_state_in[47];
+    assign data_out[11] = data_in[11]^lfsr_state_in[27]^lfsr_state_in[46];
+    assign data_out[12] = data_in[12]^lfsr_state_in[26]^lfsr_state_in[45];
+    assign data_out[13] = data_in[13]^lfsr_state_in[25]^lfsr_state_in[44];
+    assign data_out[14] = data_in[14]^lfsr_state_in[24]^lfsr_state_in[43];
+    assign data_out[15] = data_in[15]^lfsr_state_in[23]^lfsr_state_in[42];
+    assign data_out[16] = data_in[16]^lfsr_state_in[22]^lfsr_state_in[41];
+    assign data_out[17] = data_in[17]^lfsr_state_in[21]^lfsr_state_in[40];
+    assign data_out[18] = data_in[18]^lfsr_state_in[20]^lfsr_state_in[39];
+    assign data_out[19] = data_in[19]^lfsr_state_in[19]^lfsr_state_in[38];
+    assign data_out[20] = data_in[20]^lfsr_state_in[18]^lfsr_state_in[37];
+    assign data_out[21] = data_in[21]^lfsr_state_in[17]^lfsr_state_in[36];
+    assign data_out[22] = data_in[22]^lfsr_state_in[16]^lfsr_state_in[35];
+    assign data_out[23] = data_in[23]^lfsr_state_in[15]^lfsr_state_in[34];
+    assign data_out[24] = data_in[24]^lfsr_state_in[14]^lfsr_state_in[33];
+    assign data_out[25] = data_in[25]^lfsr_state_in[13]^lfsr_state_in[32];
+    assign data_out[26] = data_in[26]^lfsr_state_in[12]^lfsr_state_in[31];
+    assign data_out[27] = data_in[27]^lfsr_state_in[11]^lfsr_state_in[30];
+    assign data_out[28] = data_in[28]^lfsr_state_in[10]^lfsr_state_in[29];
+    assign data_out[29] = data_in[29]^lfsr_state_in[28]^lfsr_state_in[9];
+    assign data_out[30] = data_in[30]^lfsr_state_in[27]^lfsr_state_in[8];
+    assign data_out[31] = data_in[31]^lfsr_state_in[26]^lfsr_state_in[7];
+    assign data_out[32] = data_in[32]^lfsr_state_in[25]^lfsr_state_in[6];
+    assign data_out[33] = data_in[33]^lfsr_state_in[24]^lfsr_state_in[5];
+    assign data_out[34] = data_in[34]^lfsr_state_in[23]^lfsr_state_in[4];
+    assign data_out[35] = data_in[35]^lfsr_state_in[22]^lfsr_state_in[3];
+    assign data_out[36] = data_in[36]^lfsr_state_in[21]^lfsr_state_in[2];
+    assign data_out[37] = data_in[37]^lfsr_state_in[1]^lfsr_state_in[20];
+    assign data_out[38] = data_in[38]^lfsr_state_in[0]^lfsr_state_in[19];
+    assign data_out[39] = data_in[0]^data_in[39]^lfsr_state_in[18]^lfsr_state_in[38]^lfsr_state_in[57];
+    assign data_out[40] = data_in[1]^data_in[40]^lfsr_state_in[17]^lfsr_state_in[37]^lfsr_state_in[56];
+    assign data_out[41] = data_in[2]^data_in[41]^lfsr_state_in[16]^lfsr_state_in[36]^lfsr_state_in[55];
+    assign data_out[42] = data_in[3]^data_in[42]^lfsr_state_in[15]^lfsr_state_in[35]^lfsr_state_in[54];
+    assign data_out[43] = data_in[43]^data_in[4]^lfsr_state_in[14]^lfsr_state_in[34]^lfsr_state_in[53];
+    assign data_out[44] = data_in[44]^data_in[5]^lfsr_state_in[13]^lfsr_state_in[33]^lfsr_state_in[52];
+    assign data_out[45] = data_in[45]^data_in[6]^lfsr_state_in[12]^lfsr_state_in[32]^lfsr_state_in[51];
+    assign data_out[46] = data_in[46]^data_in[7]^lfsr_state_in[11]^lfsr_state_in[31]^lfsr_state_in[50];
+    assign data_out[47] = data_in[47]^data_in[8]^lfsr_state_in[10]^lfsr_state_in[30]^lfsr_state_in[49];
+    assign data_out[48] = data_in[48]^data_in[9]^lfsr_state_in[29]^lfsr_state_in[48]^lfsr_state_in[9];
+    assign data_out[49] = data_in[10]^data_in[49]^lfsr_state_in[28]^lfsr_state_in[47]^lfsr_state_in[8];
+    assign data_out[50] = data_in[11]^data_in[50]^lfsr_state_in[27]^lfsr_state_in[46]^lfsr_state_in[7];
+    assign data_out[51] = data_in[12]^data_in[51]^lfsr_state_in[26]^lfsr_state_in[45]^lfsr_state_in[6];
+    assign data_out[52] = data_in[13]^data_in[52]^lfsr_state_in[25]^lfsr_state_in[44]^lfsr_state_in[5];
+    assign data_out[53] = data_in[14]^data_in[53]^lfsr_state_in[24]^lfsr_state_in[43]^lfsr_state_in[4];
+    assign data_out[54] = data_in[15]^data_in[54]^lfsr_state_in[23]^lfsr_state_in[3]^lfsr_state_in[42];
+    assign data_out[55] = data_in[16]^data_in[55]^lfsr_state_in[22]^lfsr_state_in[2]^lfsr_state_in[41];
+    assign data_out[56] = data_in[17]^data_in[56]^lfsr_state_in[1]^lfsr_state_in[21]^lfsr_state_in[40];
+    assign data_out[57] = data_in[18]^data_in[57]^lfsr_state_in[0]^lfsr_state_in[20]^lfsr_state_in[39];
+    assign data_out[58] = data_in[0]^data_in[19]^data_in[58]^lfsr_state_in[19]^lfsr_state_in[57];
+    assign data_out[59] = data_in[1]^data_in[20]^data_in[59]^lfsr_state_in[18]^lfsr_state_in[56];
+    assign data_out[60] = data_in[21]^data_in[2]^data_in[60]^lfsr_state_in[17]^lfsr_state_in[55];
+    assign data_out[61] = data_in[22]^data_in[3]^data_in[61]^lfsr_state_in[16]^lfsr_state_in[54];
+    assign data_out[62] = data_in[23]^data_in[4]^data_in[62]^lfsr_state_in[15]^lfsr_state_in[53];
+    assign data_out[63] = data_in[24]^data_in[5]^data_in[63]^lfsr_state_in[14]^lfsr_state_in[52];
 
-    wire scrambled_bit = data ^ (lfsr_state[38] ^ lfsr_state[57]);
-
-    always_ff @(posedge clk or negedge arst_n) begin
-        if (!arst_n) begin
-            lfsr_state <= {LFSR_WIDTH{1'b1}};
-        end else begin
-            scrambled_data <= scrambled_bit;
-            lfsr_state <= {lfsr_state[LFSR_WIDTH-2:0], scrambled_bit};
-        end;
-    end
+    assign lfsr_state_out[57] = data_in[6]^lfsr_state_in[32]^lfsr_state_in[51];
+    assign lfsr_state_out[56] = data_in[7]^lfsr_state_in[31]^lfsr_state_in[50];
+    assign lfsr_state_out[55] = data_in[8]^lfsr_state_in[30]^lfsr_state_in[49];
+    assign lfsr_state_out[54] = data_in[9]^lfsr_state_in[29]^lfsr_state_in[48];
+    assign lfsr_state_out[53] = data_in[10]^lfsr_state_in[28]^lfsr_state_in[47];
+    assign lfsr_state_out[52] = data_in[11]^lfsr_state_in[27]^lfsr_state_in[46];
+    assign lfsr_state_out[51] = data_in[12]^lfsr_state_in[26]^lfsr_state_in[45];
+    assign lfsr_state_out[50] = data_in[13]^lfsr_state_in[25]^lfsr_state_in[44];
+    assign lfsr_state_out[49] = data_in[14]^lfsr_state_in[24]^lfsr_state_in[43];
+    assign lfsr_state_out[48] = data_in[15]^lfsr_state_in[23]^lfsr_state_in[42];
+    assign lfsr_state_out[47] = data_in[16]^lfsr_state_in[22]^lfsr_state_in[41];
+    assign lfsr_state_out[46] = data_in[17]^lfsr_state_in[21]^lfsr_state_in[40];
+    assign lfsr_state_out[45] = data_in[18]^lfsr_state_in[20]^lfsr_state_in[39];
+    assign lfsr_state_out[44] = data_in[19]^lfsr_state_in[19]^lfsr_state_in[38];
+    assign lfsr_state_out[43] = data_in[20]^lfsr_state_in[18]^lfsr_state_in[37];
+    assign lfsr_state_out[42] = data_in[21]^lfsr_state_in[17]^lfsr_state_in[36];
+    assign lfsr_state_out[41] = data_in[22]^lfsr_state_in[16]^lfsr_state_in[35];
+    assign lfsr_state_out[40] = data_in[23]^lfsr_state_in[15]^lfsr_state_in[34];
+    assign lfsr_state_out[39] = data_in[24]^lfsr_state_in[14]^lfsr_state_in[33];
+    assign lfsr_state_out[38] = data_in[25]^lfsr_state_in[13]^lfsr_state_in[32];
+    assign lfsr_state_out[37] = data_in[26]^lfsr_state_in[12]^lfsr_state_in[31];
+    assign lfsr_state_out[36] = data_in[27]^lfsr_state_in[11]^lfsr_state_in[30];
+    assign lfsr_state_out[35] = data_in[28]^lfsr_state_in[10]^lfsr_state_in[29];
+    assign lfsr_state_out[34] = data_in[29]^lfsr_state_in[28]^lfsr_state_in[9];
+    assign lfsr_state_out[33] = data_in[30]^lfsr_state_in[27]^lfsr_state_in[8];
+    assign lfsr_state_out[32] = data_in[31]^lfsr_state_in[26]^lfsr_state_in[7];
+    assign lfsr_state_out[31] = data_in[32]^lfsr_state_in[25]^lfsr_state_in[6];
+    assign lfsr_state_out[30] = data_in[33]^lfsr_state_in[24]^lfsr_state_in[5];
+    assign lfsr_state_out[29] = data_in[34]^lfsr_state_in[23]^lfsr_state_in[4];
+    assign lfsr_state_out[28] = data_in[35]^lfsr_state_in[22]^lfsr_state_in[3];
+    assign lfsr_state_out[27] = data_in[36]^lfsr_state_in[21]^lfsr_state_in[2];
+    assign lfsr_state_out[26] = data_in[37]^lfsr_state_in[1]^lfsr_state_in[20];
+    assign lfsr_state_out[25] = data_in[38]^lfsr_state_in[0]^lfsr_state_in[19];
+    assign lfsr_state_out[24] = data_in[0]^data_in[39]^lfsr_state_in[18]^lfsr_state_in[38]^lfsr_state_in[57];
+    assign lfsr_state_out[23] = data_in[1]^data_in[40]^lfsr_state_in[17]^lfsr_state_in[37]^lfsr_state_in[56];
+    assign lfsr_state_out[22] = data_in[2]^data_in[41]^lfsr_state_in[16]^lfsr_state_in[36]^lfsr_state_in[55];
+    assign lfsr_state_out[21] = data_in[3]^data_in[42]^lfsr_state_in[15]^lfsr_state_in[35]^lfsr_state_in[54];
+    assign lfsr_state_out[20] = data_in[43]^data_in[4]^lfsr_state_in[14]^lfsr_state_in[34]^lfsr_state_in[53];
+    assign lfsr_state_out[19] = data_in[44]^data_in[5]^lfsr_state_in[13]^lfsr_state_in[33]^lfsr_state_in[52];
+    assign lfsr_state_out[18] = data_in[45]^data_in[6]^lfsr_state_in[12]^lfsr_state_in[32]^lfsr_state_in[51];
+    assign lfsr_state_out[17] = data_in[46]^data_in[7]^lfsr_state_in[11]^lfsr_state_in[31]^lfsr_state_in[50];
+    assign lfsr_state_out[16] = data_in[47]^data_in[8]^lfsr_state_in[10]^lfsr_state_in[30]^lfsr_state_in[49];
+    assign lfsr_state_out[15] = data_in[48]^data_in[9]^lfsr_state_in[29]^lfsr_state_in[48]^lfsr_state_in[9];
+    assign lfsr_state_out[14] = data_in[10]^data_in[49]^lfsr_state_in[28]^lfsr_state_in[47]^lfsr_state_in[8];
+    assign lfsr_state_out[13] = data_in[11]^data_in[50]^lfsr_state_in[27]^lfsr_state_in[46]^lfsr_state_in[7];
+    assign lfsr_state_out[12] = data_in[12]^data_in[51]^lfsr_state_in[26]^lfsr_state_in[45]^lfsr_state_in[6];
+    assign lfsr_state_out[11] = data_in[13]^data_in[52]^lfsr_state_in[25]^lfsr_state_in[44]^lfsr_state_in[5];
+    assign lfsr_state_out[10] = data_in[14]^data_in[53]^lfsr_state_in[24]^lfsr_state_in[43]^lfsr_state_in[4];
+    assign lfsr_state_out[9] = data_in[15]^data_in[54]^lfsr_state_in[23]^lfsr_state_in[3]^lfsr_state_in[42];
+    assign lfsr_state_out[8] = data_in[16]^data_in[55]^lfsr_state_in[22]^lfsr_state_in[2]^lfsr_state_in[41];
+    assign lfsr_state_out[7] = data_in[17]^data_in[56]^lfsr_state_in[1]^lfsr_state_in[21]^lfsr_state_in[40];
+    assign lfsr_state_out[6] = data_in[18]^data_in[57]^lfsr_state_in[0]^lfsr_state_in[20]^lfsr_state_in[39];
+    assign lfsr_state_out[5] = data_in[0]^data_in[19]^data_in[58]^lfsr_state_in[19]^lfsr_state_in[57];
+    assign lfsr_state_out[4] = data_in[1]^data_in[20]^data_in[59]^lfsr_state_in[18]^lfsr_state_in[56];
+    assign lfsr_state_out[3] = data_in[21]^data_in[2]^data_in[60]^lfsr_state_in[17]^lfsr_state_in[55];
+    assign lfsr_state_out[2] = data_in[22]^data_in[3]^data_in[61]^lfsr_state_in[16]^lfsr_state_in[54];
+    assign lfsr_state_out[1] = data_in[23]^data_in[4]^data_in[62]^lfsr_state_in[15]^lfsr_state_in[53];
+    assign lfsr_state_out[0] = data_in[24]^data_in[5]^data_in[63]^lfsr_state_in[14]^lfsr_state_in[52];
 
 endmodule

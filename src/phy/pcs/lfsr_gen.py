@@ -208,8 +208,10 @@ history = []
 for i in range(1, data_width + 1):
     # print(states.data)
     states = GF2.multiply(states, transition)
-    print(f"out[{i - 1}] =", states.data[0][-1])
+    print(f"out[{i - 1}] = ", states.data[0][-1], ";", sep="")
     states.data[0].append(GF2_Sym(f"i[{i}]", None, None, None))
 
 print("---------")
-print(states.data[0][:-1])
+
+for i in range(lfsr_width):
+    print(f"s_out[{lfsr_width - 1 - i}] = ", states.data[0][i], ";", sep="")

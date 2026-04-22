@@ -28,46 +28,34 @@ def test_scrambler_runner():
     )
 
 
-async def generate_clock(dut):
-    """Generate clock pulses."""
-
-    while True:
-        dut.clk.value = 0
-        await Timer(1, unit="ns")
-        dut.clk.value = 1
-        await Timer(1, unit="ns")
-
-
 @cocotb.test()
 async def test_scrambler(dut):
 
-    # These come from walker_1_0700.pdf
+    # These come from https://grouper.ieee.org/groups/802/3/ae/public/jul00/walker_1_0700.pdf
     data_in = 0x000000000000001E
     data_correct = 0x7BFFF0800000001E
 
-    cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
+    dut.data_in.value = data_in
+    dut.lfsr_state_in.value = (1 << 58) - 1
 
-    dut.arst_n.value = 0
+    await Timer(1, "ns")
 
-    await Timer(5, unit="ns")  # wait a bit
-    await FallingEdge(dut.clk)  # wait for falling edge/"negedge"
-    dut.arst_n.value = 1
+    data_out = int(dut.data_out.value)
+    state_out = dut.lfsr_state_out.value
 
-    data = data_in
+    print(hex(data_out))
+    assert data_out == data_correct
 
-    data_out = 0
+    data_in = 0xD555555555555578
+    data_correct = 0x623016AAAAAD1578
 
-    for _ in range(64):
-        dut.data.value = data & 1
-        data = data >> 1
-        await FallingEdge(dut.clk)
-        data_out = (data_out << 1) | int(dut.scrambled_data.value)
+    dut.data_in.value = data_in
+    dut.lfsr_state_in.value = state_out
 
-    data_out_reversed = 0
+    await Timer(1, "ns")
 
-    for _ in range(64):
-        data_out_reversed = (data_out_reversed << 1) | (data_out & 1)
-        data_out = data_out >> 1
+    data_out = int(dut.data_out.value)
+    state_out = dut.lfsr_state_out.value
 
-    print(hex(data_out_reversed))
-    assert data_out_reversed == data_correct
+    print(hex(data_out))
+    assert data_out == data_correct
