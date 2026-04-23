@@ -179,6 +179,9 @@ data_width = 64
 
 polynomial = 0x400008000000001
 
+# Set to true for self-synchronous descrambler
+feed_forward = True
+
 
 states = GF2(
     [
@@ -209,6 +212,9 @@ for i in range(1, data_width + 1):
     # print(states.data)
     states = GF2.multiply(states, transition)
     print(f"out[{i - 1}] = ", states.data[0][-1], ";", sep="")
+    # If we are generating a feed forward lfsr we dont want to shift in the XOR value
+    if feed_forward:
+        states.data[0][-1] = GF2_Sym(f"i[{i - 1}]", None, None, None)
     states.data[0].append(GF2_Sym(f"i[{i}]", None, None, None))
 
 print("---------")
