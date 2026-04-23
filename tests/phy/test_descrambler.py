@@ -15,10 +15,7 @@ def test_descrambler_runner():
         hdl_toplevel="descrambler",
         always=True,
         waves=True,
-        build_args=[
-            "--trace-fst",
-            "--trace-structs",
-        ],
+        build_args=["--trace-fst", "--trace-structs"],
     )
     runner.test(
         hdl_toplevel="descrambler",
