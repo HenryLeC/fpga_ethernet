@@ -7,7 +7,7 @@ from cocotb.triggers import Timer
 
 def test_scrambler_runner():
     proj_path = Path(__file__).resolve().parent.parent.parent
-    sources = [proj_path / "src" / "phy" / "pcs" / "scrambler.sv"]
+    sources = [proj_path / "src" / "phy" / "pcs" / "tx" / "scrambler.sv"]
 
     runner = get_runner("verilator")
     runner.build(
