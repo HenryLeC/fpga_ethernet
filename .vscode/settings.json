@@ -8,6 +8,7 @@
         "arst",
         "cocotb",
         "negedge",
-        "verilator"
+        "verilator",
+        "xgmii"
     ]
 }
