@@ -1,1 +1,7 @@
-src/test_design/top.v
+src/test_design/top.v top=top
+src/wrapper/sfp_ila_wrapper.v
+src/i2c/i2c_master.sv
+src/i2c/cycle_timer.sv
+
+IP/sfp_ila/sfp_ila.xci
+IP/sfp_gty_0/sfp_gty_0.xci
