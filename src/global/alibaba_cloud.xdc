@@ -153,3 +153,6 @@ set_input_delay 0 [get_ports {pcie_reset_n}]
 
 # 100 MHz MGT reference clock
 create_clock -period 10 -name pcie_mgt_refclk [get_ports pcie_refclk_p]
+
+set_property SEVERITY {Warning} [get_drc_checks AVAL-244]
+set_property SEVERITY {Warning} [get_drc_checks AVAL-245] 

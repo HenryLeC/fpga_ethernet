@@ -1,16 +1,16 @@
 module sfp_ila_wrapper(
-    input clk,
-    input sfp0_npres,
-    input [7:0] sfp0_serial_number,
-    input sfp0_busy,
-    input sfp0_sda_i,
-    input sfp0_sda_o,
-    input sfp0_sda_t,
-    input sfp0_scl_i,
-    input sfp0_scl_o,
-    input sfp0_scl_t,
-    input [3:0] state_dbg,
-    input [1:0] process_dbg
+    input wire clk,
+    input wire sfp0_npres,
+    input wire [7:0] sfp0_serial_number,
+    input wire sfp0_busy,
+    input wire sfp0_sda_i,
+    input wire sfp0_sda_o,
+    input wire sfp0_sda_t,
+    input wire sfp0_scl_i,
+    input wire sfp0_scl_o,
+    input wire sfp0_scl_t,
+    input wire [3:0] state_dbg,
+    input wire [1:0] process_dbg
 );
 
     sfp_ila sfp_ila(

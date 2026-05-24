@@ -3,5 +3,14 @@ src/wrapper/sfp_ila_wrapper.v
 src/i2c/i2c_master.sv
 src/i2c/cycle_timer.sv
 
+src/phy/pma/sfp_gty.v
+src/phy/pma/helpers/bit_synchronizer.v
+src/phy/pma/helpers/reset_synchronizer.v
+src/phy/pma/helpers/gty_init.v
+src/phy/pma/helpers/sfp_gty_0_example_checking_64b66b_async.v
+src/phy/pma/helpers/sfp_gty_0_example_stimulus_64b66b_async.v
+src/phy/pma/helpers/sfp_gty_0_prbs_any.v
+
 IP/sfp_ila/sfp_ila.xci
 IP/sfp_gty_0/sfp_gty_0.xci
+IP/sfp_gty_0_vio_0/sfp_gty_0_vio_0.xci

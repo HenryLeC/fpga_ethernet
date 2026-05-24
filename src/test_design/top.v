@@ -4,6 +4,15 @@ module top (
     input wire clk_100mhz_p,
     input wire clk_100mhz_n,
 
+    input wire sfp_mgt_refclk_p,
+    input wire sfp_mgt_refclk_n,
+
+    input wire [1:0] sfp_rx_p,
+    input wire [1:0] sfp_rx_n,
+
+    output wire [1:0] sfp_tx_p,
+    output wire [1:0] sfp_tx_n,
+
     inout wire [1:0] sfp_i2c_scl,
     inout wire [1:0] sfp_i2c_sda,
     input wire [1:0] sfp_npres,
@@ -11,17 +20,17 @@ module top (
     output wire [3:0] led,
     output wire [1:0] sfp_led
 );
-    wire        clk_ibuf, clk;
+    wire        clk_ibuf, clk_100mhz;
     reg  [28:0] ctr_q = 29'd0;
     reg         unused_ctr_q = 1'b0;
     reg  [31:0] powerup_reset_q = 32'hffffffff;
 
-    wire sfp1_sda_i;
-    wire sfp1_sda_o;
-    wire sfp1_sda_t;
-    wire sfp1_scl_i;
-    wire sfp1_scl_o;
-    wire sfp1_scl_t;
+    wire sfp0_sda_i;
+    wire sfp0_sda_o;
+    wire sfp0_sda_t;
+    wire sfp0_scl_i;
+    wire sfp0_scl_o;
+    wire sfp0_scl_t;
 
     (* mark_debug = "true" *) wire [1:0] sfp_npres_dbg;
     assign sfp_npres_dbg = sfp_npres;
@@ -38,16 +47,16 @@ module top (
     (* mark_debug = "true" *) wire [3:0]  sfp1_state_dbg;
 
     sfp_ila_wrapper sfp_ila (
-        .clk(clk), // input wire clk
+        .clk(clk_100mhz), // input wire clk
         .sfp0_npres(|powerup_reset_q), // input wire [1:0] sfp_npres
-        .sfp0_serial_number(sfp1_serial_number), // input wire [127:0] sfp0_serial_number
-        .sfp0_busy(sfp1_busy), // input wire [0:0] sfp0_busy
-        .sfp0_sda_i(sfp1_sda_i),
-        .sfp0_sda_o(sfp1_sda_o),
-        .sfp0_sda_t(sfp1_sda_t),
-        .sfp0_scl_i(sfp1_scl_i),
-        .sfp0_scl_o(sfp1_scl_o),
-        .sfp0_scl_t(sfp1_scl_t),
+        .sfp0_serial_number(sfp0_serial_number), // input wire [127:0] sfp0_serial_number
+        .sfp0_busy(sfp0_busy), // input wire [0:0] sfp0_busy
+        .sfp0_sda_i(sfp0_sda_i),
+        .sfp0_sda_o(sfp0_sda_o),
+        .sfp0_sda_t(sfp0_sda_t),
+        .sfp0_scl_i(sfp0_scl_i),
+        .sfp0_scl_o(sfp0_scl_o),
+        .sfp0_scl_t(sfp0_scl_t),
         .state_dbg(state_dbg),
         .process_dbg(process_dbg)
     );
@@ -63,25 +72,25 @@ module top (
 
     BUFG m_bufg (
         .I(clk_ibuf),
-        .O(clk)
+        .O(clk_100mhz)
     );
 
     IOBUF sfp_1_sda(
-        .O(sfp1_sda_i),
-        .I(sfp1_sda_o),
-        .IO(sfp_i2c_sda[1]),
-        .T(sfp1_sda_t)
+        .O(sfp0_sda_i),
+        .I(sfp0_sda_o),
+        .IO(sfp_i2c_sda[0]),
+        .T(sfp0_sda_t)
     );
 
     IOBUF sfp_1_scl(
-        .O(sfp1_scl_i),
-        .I(sfp1_scl_o),
-        .IO(sfp_i2c_scl[1]),
-        .T(sfp1_scl_t)
+        .O(sfp0_scl_i),
+        .I(sfp0_scl_o),
+        .IO(sfp_i2c_scl[0]),
+        .T(sfp0_scl_t)
     );
 
-    always @(posedge clk) begin
-        if (sfp_npres[1]) begin
+    always @(posedge clk_100mhz) begin
+        if (sfp_npres[0]) begin
             powerup_reset_q <= 31'hffffffff;
         end else if (|powerup_reset_q) begin
             powerup_reset_q <= powerup_reset_q - 1;
@@ -102,7 +111,7 @@ module top (
         .CLOCK_STRETCHING_MAX_COUNT     ('hFF)
     )
     i2c_master_inst(
-        .clock                  (clk),
+        .clock                  (clk_100mhz),
         .reset_n                (~(|powerup_reset_q)),
         .enable                 (1'b1),
         .read_write             (1'b1),
@@ -111,15 +120,15 @@ module top (
         .device_address         (7'h50),
         .divider                (16'd200),
 
-        .miso_data              (sfp1_serial_number),
-        .busy                   (sfp1_busy),
+        .miso_data              (sfp0_serial_number),
+        .busy                   (sfp0_busy),
 
-        .sda_i                  (sfp1_sda_i),
-        .sda_o                  (sfp1_sda_o),
-        .sda_t                  (sfp1_sda_t),
-        .scl_i                  (sfp1_scl_i),
-        .scl_o                  (sfp1_scl_o),
-        .scl_t                  (sfp1_scl_t),
+        .sda_i                  (sfp0_sda_i),
+        .sda_o                  (sfp0_sda_o),
+        .sda_t                  (sfp0_sda_t),
+        .scl_i                  (sfp0_scl_i),
+        .scl_o                  (sfp0_scl_o),
+        .scl_t                  (sfp0_scl_t),
 
         .state_dbg              (state_dbg),
         .process_dbg            (process_dbg)
@@ -128,6 +137,20 @@ module top (
 
     assign led = ctr_q[28:25];
 
-    assign sfp_led[0] = sfp_npres[0];
-    assign sfp_led[1] = ~(|powerup_reset_q);
+    assign sfp_led[1] = sfp_npres[1];
+    assign sfp_led[0] = |powerup_reset_q;
+
+    sfp_gty gty_inst(
+        .mgtrefclk0_x0y3_p(sfp_mgt_refclk_p),
+        .mgtrefclk0_x0y3_n(sfp_mgt_refclk_n),
+
+        .ch0_gtyrxn_in(sfp_rx_n[0]),
+        .ch0_gtyrxp_in(sfp_rx_p[0]),
+        
+        .ch0_gtytxn_out(sfp_tx_n[0]),
+        .ch0_gtytxp_out(sfp_tx_p[0]),
+
+        .hb_gtwiz_reset_clk_freerun_in(clk_100mhz),
+        .hb_gtwiz_reset_all_in(|powerup_reset_q)
+    );
 endmodule
