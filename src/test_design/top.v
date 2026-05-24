@@ -46,20 +46,6 @@ module top (
     (* mark_debug = "true" *) wire [3:0]  sfp0_state_dbg;
     (* mark_debug = "true" *) wire [3:0]  sfp1_state_dbg;
 
-    sfp_ila_wrapper sfp_ila (
-        .clk(clk_100mhz), // input wire clk
-        .sfp0_npres(|powerup_reset_q), // input wire [1:0] sfp_npres
-        .sfp0_serial_number(sfp0_serial_number), // input wire [127:0] sfp0_serial_number
-        .sfp0_busy(sfp0_busy), // input wire [0:0] sfp0_busy
-        .sfp0_sda_i(sfp0_sda_i),
-        .sfp0_sda_o(sfp0_sda_o),
-        .sfp0_sda_t(sfp0_sda_t),
-        .sfp0_scl_i(sfp0_scl_i),
-        .sfp0_scl_o(sfp0_scl_o),
-        .sfp0_scl_t(sfp0_scl_t),
-        .state_dbg(state_dbg),
-        .process_dbg(process_dbg)
-    );
 
     IBUFDS #(
         .DIFF_TERM("TRUE"),
@@ -140,6 +126,10 @@ module top (
     assign sfp_led[1] = sfp_npres[1];
     assign sfp_led[0] = |powerup_reset_q;
 
+    wire rx_clk;
+    wire [1:0] rx_header;
+    wire [63:0] rx_data;
+
     sfp_gty gty_inst(
         .mgtrefclk0_x0y3_p(sfp_mgt_refclk_p),
         .mgtrefclk0_x0y3_n(sfp_mgt_refclk_n),
@@ -151,6 +141,16 @@ module top (
         .ch0_gtytxp_out(sfp_tx_p[0]),
 
         .hb_gtwiz_reset_clk_freerun_in(clk_100mhz),
-        .hb_gtwiz_reset_all_in(|powerup_reset_q)
+        .hb_gtwiz_reset_all_in(|powerup_reset_q),
+
+        .rx_clk(rx_clk),
+        .rx_header(rx_header),
+        .rx_data(rx_data)
+    );
+
+    sfp_ila sfp_ila (
+        .clk(rx_clk),
+        .probe0(rx_header),
+        .probe1(rx_data)
     );
 endmodule

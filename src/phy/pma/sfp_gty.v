@@ -69,12 +69,17 @@ module sfp_gty (
 
   // User-provided ports for reset helper block(s)
   input  wire hb_gtwiz_reset_clk_freerun_in,
-  input  wire hb_gtwiz_reset_all_in
+  input  wire hb_gtwiz_reset_all_in,
 
   // PRBS-based link status ports
   // input  wire link_down_latched_reset_in,
   // output wire link_status_out,
   // output reg  link_down_latched_out = 1'b1
+
+
+  output wire rx_clk,
+  output wire [1:0] rx_header,
+  output wire [63:0] rx_data
 
 );
 
@@ -666,6 +671,10 @@ module sfp_gty (
    ,.txpmaresetdone_out                      (txpmaresetdone_int)
    ,.txprgdivresetdone_out                   (txprgdivresetdone_int)
 );
+
+  assign rx_clk = gtwiz_userclk_rx_usrclk2_int;
+  assign rx_header = rxheader_int[1:0];
+  assign rx_data = gtwiz_userdata_rx_int;
 
 
 endmodule
