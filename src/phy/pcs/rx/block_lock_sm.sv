@@ -3,7 +3,8 @@ module block_lock_sm(
     input wire clk_rx,
     input wire [1:0] rx_header,
 
-    output reg gearbox_slip
+    output reg gearbox_slip,
+    output wire block_lock
 );
 
     reg rx_block_lock;
@@ -69,4 +70,6 @@ module block_lock_sm(
 
         gearbox_slip           = state == X_SLIP;
     end
+
+    assign block_lock = rx_block_lock;
 endmodule

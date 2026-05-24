@@ -145,7 +145,20 @@ module top (
 
         .rx_clk(rx_clk),
         .rx_header(rx_header),
-        .rx_data(rx_data)
+        .rx_data(rx_data),
+
+        .link_status(link_status),
+        .gearbox_slip(gearbox_slip)
+    );
+
+    wire gearbox_slip, link_status;
+
+    block_lock_sm block_lock_inst(
+        .rst_a(|powerup_reset_q),
+        .clk_rx(rx_clk),
+        .rx_header(rx_header),
+        .gearbox_slip(gearbox_slip),
+        .block_lock(link_status)
     );
 
     sfp_ila sfp_ila (

@@ -3,6 +3,8 @@ src/test_design/top.v top=top
 src/i2c/i2c_master.sv
 src/i2c/cycle_timer.sv
 
+src/pcs/rx/block_lock_sm.sv
+
 src/phy/pma/sfp_gty.v
 src/phy/pma/helpers/bit_synchronizer.v
 src/phy/pma/helpers/reset_synchronizer.v

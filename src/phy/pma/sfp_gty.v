@@ -79,12 +79,14 @@ module sfp_gty (
 
   output wire rx_clk,
   output wire [1:0] rx_header,
-  output wire [63:0] rx_data
+  output wire [63:0] rx_data,
+
+  input wire link_status,
+  input wire gearbox_slip
 
 );
 
   wire link_down_latched_reset_in = 1'b0;
-  wire link_status_out;
   reg link_down_latched_out = 1'b1;
 
 
@@ -379,83 +381,83 @@ module sfp_gty (
   // -------------------------------------------------------------------------------------------------------------------
 
   // Declare a signal vector of PRBS match indicators, with one indicator bit per transceiver channel
-  wire [0:0] prbs_match_int;
+  // wire [0:0] prbs_match_int;
 
   // PRBS-based data checking module for transceiver channel 0
-  sfp_gty_0_example_checking_64b66b_async example_checking_inst0 (
-    .gtwiz_reset_all_in          (hb_gtwiz_reset_all_int || ~hb0_gtwiz_reset_rx_done_int ),
-    .gtwiz_userclk_rx_usrclk2_in (hb0_gtwiz_userclk_rx_usrclk2_int),
-    .gtwiz_userclk_rx_active_in  (hb0_gtwiz_userclk_rx_active_int),
-    .rxdatavalid_in              (ch0_rxdatavalid_int),
-    .rxgearboxslip_out           (ch0_rxgearboxslip_int),
-    .rxdata_in                   (hb0_gtwiz_userdata_rx_int),
-    .prbs_match_out              (prbs_match_int[0])
-  );
+  // sfp_gty_0_example_checking_64b66b_async example_checking_inst0 (
+  //   .gtwiz_reset_all_in          (hb_gtwiz_reset_all_int || ~hb0_gtwiz_reset_rx_done_int ),
+  //   .gtwiz_userclk_rx_usrclk2_in (hb0_gtwiz_userclk_rx_usrclk2_int),
+  //   .gtwiz_userclk_rx_active_in  (hb0_gtwiz_userclk_rx_active_int),
+  //   .rxdatavalid_in              (ch0_rxdatavalid_int),
+  //   .rxgearboxslip_out           (ch0_rxgearboxslip_int),
+  //   .rxdata_in                   (hb0_gtwiz_userdata_rx_int),
+  //   .prbs_match_out              (prbs_match_int[0])
+  // );
 
   // PRBS match and related link management
   // -------------------------------------------------------------------------------------------------------------------
 
   // Perform a bitwise NAND of all PRBS match indicators, creating a combinatorial indication of any PRBS mismatch
   // across all transceiver channels
-  wire prbs_error_any_async = ~(&prbs_match_int);
-  wire prbs_error_any_sync;
+  // wire prbs_error_any_async = ~(&prbs_match_int);
+  // wire prbs_error_any_sync;
 
-  // Synchronize the PRBS mismatch indicator the free-running clock domain, using a reset synchronizer with asynchronous
-  // reset and synchronous removal
-  (* DONT_TOUCH = "TRUE" *)
-  reset_synchronizer reset_synchronizer_prbs_match_all_inst (
-    .clk_in (hb_gtwiz_reset_clk_freerun_buf_int),
-    .rst_in (prbs_error_any_async),
-    .rst_out(prbs_error_any_sync)
-  );
+  // // Synchronize the PRBS mismatch indicator the free-running clock domain, using a reset synchronizer with asynchronous
+  // // reset and synchronous removal
+  // (* DONT_TOUCH = "TRUE" *)
+  // reset_synchronizer reset_synchronizer_prbs_match_all_inst (
+  //   .clk_in (hb_gtwiz_reset_clk_freerun_buf_int),
+  //   .rst_in (prbs_error_any_async),
+  //   .rst_out(prbs_error_any_sync)
+  // );
 
   // Implement an example link status state machine using a simple leaky bucket mechanism. The link status indicates
   // the continual PRBS match status to both the top-level observer and the initialization state machine, while being
   // tolerant of occasional bit errors. This is an example and can be modified as necessary.
-  localparam ST_LINK_DOWN = 1'b0;
-  localparam ST_LINK_UP   = 1'b1;
-  reg        sm_link      = ST_LINK_DOWN;
-  reg [6:0]  link_ctr     = 7'd0;
+  // localparam ST_LINK_DOWN = 1'b0;
+  // localparam ST_LINK_UP   = 1'b1;
+  // reg        sm_link      = ST_LINK_DOWN;
+  // reg [6:0]  link_ctr     = 7'd0;
 
-  always @(posedge hb_gtwiz_reset_clk_freerun_buf_int) begin
-    case (sm_link)
-      // The link is considered to be down when the link counter initially has a value less than 67. When the link is
-      // down, the counter is incremented on each cycle where all PRBS bits match, but reset whenever any PRBS mismatch
-      // occurs. When the link counter reaches 67, transition to the link up state.
-      ST_LINK_DOWN: begin
-        if (prbs_error_any_sync !== 1'b0) begin
-          link_ctr <= 7'd0;
-        end
-        else begin
-          if (link_ctr < 7'd67)
-            link_ctr <= link_ctr + 7'd1;
-          else
-            sm_link <= ST_LINK_UP;
-        end
-      end
+  // always @(posedge hb_gtwiz_reset_clk_freerun_buf_int) begin
+  //   case (sm_link)
+  //     // The link is considered to be down when the link counter initially has a value less than 67. When the link is
+  //     // down, the counter is incremented on each cycle where all PRBS bits match, but reset whenever any PRBS mismatch
+  //     // occurs. When the link counter reaches 67, transition to the link up state.
+  //     ST_LINK_DOWN: begin
+  //       if (prbs_error_any_sync !== 1'b0) begin
+  //         link_ctr <= 7'd0;
+  //       end
+  //       else begin
+  //         if (link_ctr < 7'd67)
+  //           link_ctr <= link_ctr + 7'd1;
+  //         else
+  //           sm_link <= ST_LINK_UP;
+  //       end
+  //     end
 
-      // When the link is up, the link counter is decreased by 34 whenever any PRBS mismatch occurs, but is increased by
-      // only 1 on each cycle where all PRBS bits match, up to its saturation point of 67. If the link counter reaches
-      // 0 (including rollover protection), transition to the link down state.
-      ST_LINK_UP: begin
-        if (prbs_error_any_sync !== 1'b0) begin
-          if (link_ctr > 7'd33) begin
-            link_ctr <= link_ctr - 7'd34;
-            if (link_ctr == 7'd34)
-              sm_link  <= ST_LINK_DOWN;
-          end
-          else begin
-            link_ctr <= 7'd0;
-            sm_link  <= ST_LINK_DOWN;
-          end
-        end
-        else begin
-          if (link_ctr < 7'd67)
-            link_ctr <= link_ctr + 7'd1;
-        end
-      end
-    endcase
-  end
+  //     // When the link is up, the link counter is decreased by 34 whenever any PRBS mismatch occurs, but is increased by
+  //     // only 1 on each cycle where all PRBS bits match, up to its saturation point of 67. If the link counter reaches
+  //     // 0 (including rollover protection), transition to the link down state.
+  //     ST_LINK_UP: begin
+  //       if (prbs_error_any_sync !== 1'b0) begin
+  //         if (link_ctr > 7'd33) begin
+  //           link_ctr <= link_ctr - 7'd34;
+  //           if (link_ctr == 7'd34)
+  //             sm_link  <= ST_LINK_DOWN;
+  //         end
+  //         else begin
+  //           link_ctr <= 7'd0;
+  //           sm_link  <= ST_LINK_DOWN;
+  //         end
+  //       end
+  //       else begin
+  //         if (link_ctr < 7'd67)
+  //           link_ctr <= link_ctr + 7'd1;
+  //       end
+  //     end
+  //   endcase
+  // end
 
   // Synchronize the latched link down reset input and the VIO-driven signal into the free-running clock domain
   wire link_down_latched_reset_vio_int;
@@ -473,12 +475,12 @@ module sfp_gty (
   always @(posedge hb_gtwiz_reset_clk_freerun_buf_int) begin
     if (link_down_latched_reset_sync)
       link_down_latched_out <= 1'b0;
-    else if (!sm_link)
+    else if (!link_status)
       link_down_latched_out <= 1'b1;
   end
 
   // Assign the link status indicator to the top-level two-state output for user reference
-  assign link_status_out = sm_link;
+  // assign link_status = sm_link;
 
 
   // ===================================================================================================================
@@ -603,7 +605,7 @@ module sfp_gty (
   // User Guide: Programming and Debugging (UG908)
   sfp_gty_0_vio_0 sfp_gty_0_vio_0_inst (
     .clk (hb_gtwiz_reset_clk_freerun_buf_int)
-    ,.probe_in0 (link_status_out)
+    ,.probe_in0 (link_status)
     ,.probe_in1 (link_down_latched_out)
     ,.probe_in2 (init_done_int)
     ,.probe_in3 (init_retry_ctr_int)
@@ -658,7 +660,7 @@ module sfp_gty (
    ,.gtrefclk00_in                           (gtrefclk00_int)
    ,.qpll0outclk_out                         (qpll0outclk_int)
    ,.qpll0outrefclk_out                      (qpll0outrefclk_int)
-   ,.rxgearboxslip_in                        (rxgearboxslip_int)
+   ,.rxgearboxslip_in                        (gearbox_slip)
    ,.txheader_in                             (txheader_int)
    ,.txsequence_in                           (txsequence_int)
    ,.gtpowergood_out                         (gtpowergood_int)
