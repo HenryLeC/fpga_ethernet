@@ -514,7 +514,7 @@ module sfp_gty (
     .reset_all_in    (hb_gtwiz_reset_all_int),
     .tx_init_done_in (gtwiz_reset_tx_done_int),
     .rx_init_done_in (gtwiz_reset_rx_done_int),
-    .rx_data_good_in (sm_link),
+    .rx_data_good_in (link_status),
     .reset_all_out   (hb_gtwiz_reset_all_init_int),
     .reset_rx_out    (hb_gtwiz_reset_rx_datapath_init_int),
     .init_done_out   (init_done_int),
