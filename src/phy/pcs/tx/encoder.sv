@@ -4,21 +4,12 @@ module encoder #() (
     input arst_n,
 
     // XGMII interface to PCS
-    input [31:0] TXD,
-    input [3:0] TXC,
+    input [63:0] TXD,
+    input [7:0] TXC,
 
-    // Unscrambled block (one valid every 2 cycles)
-    output reg block_valid,
     output reg [1:0] header,
     output reg [63:0] data
 );
-
-    reg [31:0] prev_txd;
-    reg [3:0] prev_txc;
-
-    wire [63:0] concat_txd = {TXD, prev_txd};
-    wire [7:0] concat_txc = {TXC, prev_txc};
-
     import code_defs::*;
 
     function automatic logic [63:0] encode_packet(input logic [63:0] idata, input logic [7:0] ictl);
@@ -76,15 +67,7 @@ module encoder #() (
     endfunction
 
     always_ff @( posedge clk or negedge arst_n ) begin : shift_and_valid_assert
-        if (!arst_n) begin
-            block_valid <= 1;
-        end
-        else begin
-            prev_txd <= TXD;
-            prev_txc <= TXC;
-            block_valid <= ~block_valid; // The output is valid every other cycle
-            data <= encode_packet(concat_txd, concat_txc);
-            header <= concat_txc == '0 ? 2'b10 : 2'b01;
-        end
+        data <= encode_packet(TXD, TXC);
+        header <= TXC == '0 ? 2'b10 : 2'b01;
     end
 endmodule

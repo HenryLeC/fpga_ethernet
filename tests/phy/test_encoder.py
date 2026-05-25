@@ -67,16 +67,10 @@ async def test_encoder(dut):
 
     for i in range(len(correct_output_block)):
         cocotb.log.info(f"Iteration: {i}")
-        dut.TXD.value = test_input_data[2 * i]
-        dut.TXC.value = test_input_control[2 * i]
+        dut.TXD.value = test_input_data[2 * i] + (test_input_data[2 * i + 1] << 32)
+        dut.TXC.value = test_input_control[2 * i] + (test_input_control[2 * i + 1] << 4)
 
         await FallingEdge(dut.clk)
 
-        dut.TXD.value = test_input_data[2 * i + 1]
-        dut.TXC.value = test_input_control[2 * i + 1]
-
-        await FallingEdge(dut.clk)
-
-        assert dut.block_valid.value
         assert dut.data.value == correct_output_block[i]
         assert dut.header.value == correct_output_header[i]
