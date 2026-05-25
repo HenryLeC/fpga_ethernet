@@ -76,6 +76,9 @@ module sfp_gty (
   // output wire link_status_out,
   // output reg  link_down_latched_out = 1'b1
 
+  output wire tx_clk,
+  input wire [1:0] tx_header,
+  input wire [63:0] tx_data,
 
   output wire rx_clk,
   output wire [1:0] rx_header,
@@ -655,13 +658,13 @@ module sfp_gty (
    ,.gtwiz_reset_rx_cdr_stable_out           (gtwiz_reset_rx_cdr_stable_int)
    ,.gtwiz_reset_tx_done_out                 (gtwiz_reset_tx_done_int)
    ,.gtwiz_reset_rx_done_out                 (gtwiz_reset_rx_done_int)
-   ,.gtwiz_userdata_tx_in                    (gtwiz_userdata_tx_int)
+   ,.gtwiz_userdata_tx_in                    (tx_data)
    ,.gtwiz_userdata_rx_out                   (gtwiz_userdata_rx_int)
    ,.gtrefclk00_in                           (gtrefclk00_int)
    ,.qpll0outclk_out                         (qpll0outclk_int)
    ,.qpll0outrefclk_out                      (qpll0outrefclk_int)
    ,.rxgearboxslip_in                        (gearbox_slip)
-   ,.txheader_in                             (txheader_int)
+   ,.txheader_in                             (tx_header)
    ,.txsequence_in                           (txsequence_int)
    ,.gtpowergood_out                         (gtpowergood_int)
    ,.rxdatavalid_out                         (rxdatavalid_int)
@@ -675,8 +678,9 @@ module sfp_gty (
 );
 
   assign rx_clk = gtwiz_userclk_rx_usrclk2_int;
+  assign tx_clk = gtwiz_userclk_tx_usrclk2_int;
+
   assign rx_header = rxheader_int[1:0];
   assign rx_data = gtwiz_userdata_rx_int;
-
 
 endmodule

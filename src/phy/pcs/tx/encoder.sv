@@ -1,7 +1,6 @@
 `include "include/code_defs.svh"
 module encoder #() (
     input clk,
-    input arst_n,
 
     // XGMII interface to PCS
     input [63:0] TXD,
@@ -66,7 +65,7 @@ module encoder #() (
         end
     endfunction
 
-    always_ff @( posedge clk or negedge arst_n ) begin : shift_and_valid_assert
+    always_ff @(posedge clk) begin : shift_and_valid_assert
         data <= encode_packet(TXD, TXC);
         header <= TXC == '0 ? 2'b10 : 2'b01;
     end

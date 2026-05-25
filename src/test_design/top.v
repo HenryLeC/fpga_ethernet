@@ -126,9 +126,9 @@ module top (
     assign sfp_led[1] = sfp_npres[1];
     assign sfp_led[0] = |powerup_reset_q;
 
-    wire rx_clk;
-    wire [1:0] rx_header;
-    wire [63:0] rx_data;
+    wire rx_clk, tx_clk;
+    wire [1:0] rx_header, tx_header;
+    wire [63:0] rx_data, tx_data;
 
     sfp_gty gty_inst(
         .mgtrefclk0_x0y3_p(sfp_mgt_refclk_p),
@@ -142,6 +142,10 @@ module top (
 
         .hb_gtwiz_reset_clk_freerun_in(clk_100mhz),
         .hb_gtwiz_reset_all_in(|powerup_reset_q),
+
+        .tx_clk(tx_clk),
+        .tx_header(tx_header),
+        .tx_data(tx_data),
 
         .rx_clk(rx_clk),
         .rx_header(rx_header),
@@ -165,5 +169,15 @@ module top (
         .clk(rx_clk),
         .probe0(rx_header),
         .probe1(rx_data)
+    );
+
+    pcs_tx tx_pcs_inst (
+        .clk(tx_clk),
+        
+        .TXD({8{8'h07}}),
+        .TXC(8'hFF),
+
+        .tx_data(tx_data),
+        .tx_header(tx_header)
     );
 endmodule
