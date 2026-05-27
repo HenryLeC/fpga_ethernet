@@ -1,3 +1,4 @@
+`default_nettype none
 module pcs_tx #(
     parameter LFSR_INITIAL_STATE = 58'hFEEDFEEDFEEDFEE
 ) (
@@ -31,7 +32,7 @@ module pcs_tx #(
         .data_in(unscrambled_data),
         .lfsr_state_in(lfsr_state),
         .data_out(tx_data),
-        .lfsr_state_out()
+        .lfsr_state_out(next_lfsr_state)
     );
 
     always_ff @(posedge clk) begin: store_lfsr_state
