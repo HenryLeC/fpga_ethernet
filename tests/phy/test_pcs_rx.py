@@ -2,7 +2,6 @@ from pathlib import Path
 
 import cocotb
 from cocotb_tools.runner import get_runner
-from cocotb.types import LogicArray
 from cocotb.triggers import FallingEdge, Timer
 
 
