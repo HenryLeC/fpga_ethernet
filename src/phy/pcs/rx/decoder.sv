@@ -1,10 +1,10 @@
-`include "include/code_defs.svh"
+`default_nettype none
+`include "code_defs.svh"
 module decoder #() (
-    input clk,
-    input arst_n,
+    input wire clk,
 
-    input [63:0] rx_data,
-    input [1:0] rx_header,
+    input wire [63:0] rx_data,
+    input wire [1:0] rx_header,
 
     // XGMII interface to MAC
     output reg [63:0] RXD,
@@ -107,14 +107,9 @@ module decoder #() (
         end
     end
 
-    always_ff @(posedge clk or negedge arst_n) begin
-        if (!arst_n) begin
-            RXD <= '0;
-            RXC <= '0;
-        end else begin
-            RXD <= xgmii_rx_data;
-            RXC <= xgmii_rx_control;
-        end
+    always_ff @(posedge clk) begin
+        RXD <= xgmii_rx_data;
+        RXC <= xgmii_rx_control;
     end
 
 endmodule

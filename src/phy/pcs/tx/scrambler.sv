@@ -1,8 +1,9 @@
+`default_nettype none
 module scrambler (
-    input [63:0] data_in,
-    input [57:0] lfsr_state_in,
-    output [63:0] data_out,
-    output [57:0] lfsr_state_out
+    input wire [63:0] data_in,
+    input wire [57:0] lfsr_state_in,
+    output wire [63:0] data_out,
+    output wire [57:0] lfsr_state_out
 );
 
     assign data_out[0] = data_in[0]^lfsr_state_in[38]^lfsr_state_in[57];

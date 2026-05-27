@@ -1,10 +1,11 @@
-`include "include/code_defs.svh"
+`default_nettype none
+`include "code_defs.svh"
 module encoder #() (
-    input clk,
+    input wire clk,
 
     // XGMII interface to PCS
-    input [63:0] TXD,
-    input [7:0] TXC,
+    input wire [63:0] TXD,
+    input wire [7:0] TXC,
 
     output reg [1:0] header,
     output reg [63:0] data

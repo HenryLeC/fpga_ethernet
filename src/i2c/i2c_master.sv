@@ -38,15 +38,15 @@ module i2c_master#(
     output  reg     [(NUMBER_OF_DATA_BYTES*8)-1:0]      miso_data,
     output  logic                                       busy,
 
-    input                                               sda_i,
-    output                                              sda_o,
-    output                                              sda_t,
-    input                                               scl_i,
-    output                                              scl_o,
-    output                                              scl_t,
-
-    output  [3:0]                                       state_dbg,
-    output  [1:0]                                       process_dbg
+    input   wire                                        sda_i,
+    output  wire                                        sda_o,
+    output  wire                                        sda_t,
+    input   wire                                        scl_i,
+    output  wire                                        scl_o,
+    output  wire                                        scl_t,
+    
+    output  wire    [3:0]                               state_dbg,
+    output  wire    [1:0]                               process_dbg
 );
 
 
