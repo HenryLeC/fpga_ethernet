@@ -15,7 +15,12 @@ def test_decoder_runner():
         hdl_toplevel="decoder",
         always=True,
         waves=True,
-        build_args=["--trace-fst", "--trace-structs", f"-I{proj_path / "src"}"],
+        build_args=[
+            "--trace-fst",
+            "--trace-structs",
+            f"-I{proj_path / "src"}",
+            f"-I{proj_path / "src" / "include"}",
+        ],
     )
     runner.test(
         hdl_toplevel="decoder",
@@ -41,11 +46,8 @@ async def test_decoder(dut):
 
     cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
 
-    dut.arst_n.value = 0
-
     await Timer(5, unit="ns")  # wait a bit
     await FallingEdge(dut.clk)  # wait for falling edge/"negedge"
-    dut.arst_n.value = 1
 
     test_block = [0x000000000000001E, 0xD555555555555578, 0x8B0E380577200008]
     test_header = [0b01, 0b01, 0b10]

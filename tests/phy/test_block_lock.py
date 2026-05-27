@@ -16,7 +16,12 @@ def test_block_lock_runner():
         hdl_toplevel="block_lock_sm",
         always=True,
         waves=True,
-        build_args=["--trace-fst", "--trace-structs", f"-I{proj_path / "src"}"],
+        build_args=[
+            "--trace-fst",
+            "--trace-structs",
+            f"-I{proj_path / "src"}",
+            f"-I{proj_path / "src" / "include"}",
+        ],
     )
     runner.test(
         hdl_toplevel="block_lock_sm",

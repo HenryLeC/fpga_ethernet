@@ -15,7 +15,12 @@ def test_encoder_runner():
         hdl_toplevel="encoder",
         always=True,
         waves=True,
-        build_args=["--trace-fst", "--trace-structs", f"-I{proj_path / "src"}"],
+        build_args=[
+            "--trace-fst",
+            "--trace-structs",
+            f"-I{proj_path / "src"}",
+            f"-I{proj_path / "src" / "include"}",
+        ],
     )
     runner.test(
         hdl_toplevel="encoder",
@@ -41,11 +46,8 @@ async def test_encoder(dut):
 
     cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
 
-    dut.arst_n.value = 0
-
     await Timer(5, unit="ns")  # wait a bit
     await FallingEdge(dut.clk)  # wait for falling edge/"negedge"
-    dut.arst_n.value = 1
 
     test_input_data = [
         0x07070707,
