@@ -473,12 +473,21 @@ module sfp_gty (
     .o_out  (link_down_latched_reset_sync)
   );
 
+  wire link_status_sync;
+
+  (* DONT_TOUCH = "TRUE" *)
+  bit_synchronizer bit_synchronizer_link_status_inst (
+    .clk_in (hb_gtwiz_reset_clk_freerun_buf_int),
+    .i_in   (link_status),
+    .o_out  (link_status_sync)
+  );
+
   // Reset the latched link down indicator when the synchronized latched link down reset signal is high. Otherwise, set
   // the latched link down indicator upon losing link. This indicator is available for user reference.
   always @(posedge hb_gtwiz_reset_clk_freerun_buf_int) begin
     if (link_down_latched_reset_sync)
       link_down_latched_out <= 1'b0;
-    else if (!link_status)
+    else if (!link_status_sync)
       link_down_latched_out <= 1'b1;
   end
 
@@ -608,7 +617,7 @@ module sfp_gty (
   // User Guide: Programming and Debugging (UG908)
   sfp_gty_0_vio_0 sfp_gty_0_vio_0_inst (
     .clk (hb_gtwiz_reset_clk_freerun_buf_int)
-    ,.probe_in0 (link_status)
+    ,.probe_in0 (link_status_sync)
     ,.probe_in1 (link_down_latched_out)
     ,.probe_in2 (init_done_int)
     ,.probe_in3 (init_retry_ctr_int)
@@ -680,7 +689,7 @@ module sfp_gty (
   assign rx_clk = gtwiz_userclk_rx_usrclk2_int;
   assign tx_clk = gtwiz_userclk_tx_usrclk2_int;
 
-  assign rx_header = rxheader_int[1:0];
-  assign rx_data = gtwiz_userdata_rx_int;
+  assign rx_header = {<< {rxheader_int[1:0]}}; // Flip byte order
+  assign rx_data = {<< {gtwiz_userdata_rx_int}};
 
 endmodule

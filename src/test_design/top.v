@@ -155,10 +155,17 @@ module top (
         .gearbox_slip(gearbox_slip)
     );
 
+    wire rst_sync;
+    reset_synchronizer reset_synchronizer_powerup_reset_q_inst(
+        .clk_in(rx_clk),
+        .rst_in(|powerup_reset_q),
+        .rst_out(rst_sync)
+    );
+
     wire gearbox_slip, link_status;
 
     block_lock_sm block_lock_inst(
-        .rst_a(|powerup_reset_q),
+        .rst_a(rst_sync),
         .clk_rx(rx_clk),
         .rx_header(rx_header),
         .gearbox_slip(gearbox_slip),
@@ -168,7 +175,9 @@ module top (
     sfp_ila sfp_ila (
         .clk(rx_clk),
         .probe0(rx_header),
-        .probe1(rx_data)
+        .probe1(rx_data),
+        .probe2(RXC),
+        .probe3(RXD)
     );
 
     pcs_tx tx_pcs_inst (
@@ -179,5 +188,18 @@ module top (
 
         .tx_data(tx_data),
         .tx_header(tx_header)
+    );
+
+    wire [63:0] RXD;
+    wire [7:0] RXC;
+
+    pcs_rx rx_pcs_inst(
+        .clk(rx_clk),
+        
+        .rx_data(rx_data),
+        .rx_header(rx_header),
+        
+        .RXD(RXD),
+        .RXC(RXC)
     );
 endmodule
