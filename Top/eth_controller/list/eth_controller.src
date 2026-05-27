@@ -3,7 +3,16 @@ src/test_design/top.v top=top
 src/i2c/i2c_master.sv
 src/i2c/cycle_timer.sv
 
+src/include/code_defs.svh
+
 src/phy/pcs/rx/block_lock_sm.sv
+src/phy/pcs/rx/decoder.sv
+src/phy/pcs/rx/descrambler.sv
+src/phy/pcs/rx/pcs_rx.sv
+
+src/phy/pcs/tx/encoder.sv
+src/phy/pcs/tx/pcs_tx.sv
+src/phy/pcs/tx/scrambler.sv
 
 src/phy/pma/sfp_gty.v
 src/phy/pma/helpers/bit_synchronizer.v
