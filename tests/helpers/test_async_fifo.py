@@ -3,7 +3,6 @@ from pathlib import Path
 import cocotb
 from cocotb_tools.runner import get_runner
 from cocotb.triggers import Combine, FallingEdge, Timer
-import random
 
 
 def test_async_fifo_runner():
