@@ -5,6 +5,11 @@ src/i2c/cycle_timer.sv
 
 src/include/code_defs.svh
 
+src/helpers/async_fifo.sv
+
+src/mac/mac.sv
+src/mac/receive_synchronizer.sv
+
 src/phy/pcs/rx/block_lock_sm.sv
 src/phy/pcs/rx/decoder.sv
 src/phy/pcs/rx/descrambler.sv

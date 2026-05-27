@@ -172,26 +172,27 @@ module top (
         .block_lock(link_status)
     );
 
-    sfp_ila sfp_ila (
-        .clk(rx_clk),
-        .probe0(rx_header),
-        .probe1(rx_data),
-        .probe2(RXC),
-        .probe3(RXD)
+    mac mac_inst(
+        .i_txclk(tx_clk),
+        .o_TXD(TXD),
+        .o_TXC(TXC),
+        .i_rxclk(rx_clk),
+        .i_RXD(RXD),
+        .i_RXC(RXC)
     );
+
+    wire [63:0] RXD, TXD;
+    wire [7:0] RXC, TXC;
 
     pcs_tx tx_pcs_inst (
         .clk(tx_clk),
         
-        .TXD({8{8'h07}}),
-        .TXC(8'hFF),
+        .TXD(TXD),
+        .TXC(TXC),
 
         .tx_data(tx_data),
         .tx_header(tx_header)
     );
-
-    wire [63:0] RXD;
-    wire [7:0] RXC;
 
     pcs_rx rx_pcs_inst(
         .clk(rx_clk),
