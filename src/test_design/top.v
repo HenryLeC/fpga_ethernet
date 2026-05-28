@@ -126,9 +126,10 @@ module top (
     assign sfp_led[1] = sfp_npres[1];
     assign sfp_led[0] = |powerup_reset_q;
 
-    wire rx_clk, tx_clk;
-    wire [1:0] rx_header, tx_header;
-    wire [63:0] rx_data, tx_data;
+    wire        rx_clk,    tx_clk;
+    wire [1:0]  rx_header, tx_header;
+    wire [31:0] rx_data,   tx_data;
+    wire        rx_header_valid, tx_header_valid;
 
     sfp_gty gty_inst(
         .mgtrefclk0_x0y3_p(sfp_mgt_refclk_p),
@@ -146,10 +147,12 @@ module top (
         .tx_clk(tx_clk),
         .tx_header(tx_header),
         .tx_data(tx_data),
+        .tx_header_valid(tx_header_valid),
 
         .rx_clk(rx_clk),
         .rx_header(rx_header),
         .rx_data(rx_data),
+        .rx_header_valid(rx_header_valid),
 
         .link_status(link_status),
         .gearbox_slip(gearbox_slip)
@@ -191,7 +194,8 @@ module top (
         .TXC(TXC),
 
         .tx_data(tx_data),
-        .tx_header(tx_header)
+        .tx_header(tx_header),
+        .header_valid(tx_header_valid)
     );
 
     pcs_rx rx_pcs_inst(
@@ -199,7 +203,8 @@ module top (
         
         .rx_data(rx_data),
         .rx_header(rx_header),
-        
+        .header_valid(rx_header_valid),
+
         .RXD(RXD),
         .RXC(RXC)
     );

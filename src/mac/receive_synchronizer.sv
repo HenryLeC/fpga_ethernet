@@ -2,17 +2,19 @@ module receive_synchronizer (
     input  wire        i_txclk,
     input  wire        i_rxclk,
 
-    input  wire [63:0] i_RXD,
-    input  wire [7:0]  i_RXC,
+    input  wire [31:0] i_RXD,
+    input  wire [3:0]  i_RXC,
 
-    output wire [63:0] o_RXD,
-    output wire [7:0]  o_RXC,
+    output wire [31:0] o_RXD,
+    output wire [3:0]  o_RXC,
     output wire        o_empty
 );
 
-    wire [71:0] read_data;
+    wire [35:0] read_data;
 
-    async_fifo async_fifo_inst(
+    async_fifo #(
+        .DATA_WIDTH(36)
+    ) async_fifo_inst  (
         .i_wclk(i_rxclk),
         .i_wrst(1'b0),
         .i_wr(1'b1),
@@ -25,6 +27,6 @@ module receive_synchronizer (
         .o_rempty(o_empty)
     );
 
-    assign o_RXD = read_data[63:0];
-    assign o_RXC = read_data[71:64];
+    assign o_RXD = read_data[31:0];
+    assign o_RXC = read_data[35:32];
 endmodule

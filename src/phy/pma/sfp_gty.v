@@ -76,13 +76,15 @@ module sfp_gty (
   // output wire link_status_out,
   // output reg  link_down_latched_out = 1'b1
 
-  output wire tx_clk,
-  input wire [1:0] tx_header,
-  input wire [63:0] tx_data,
+  output wire       tx_clk,
+  input wire [1:0]  tx_header,
+  input wire [31:0] tx_data,
+  input wire        tx_header_valid,
 
   output wire rx_clk,
-  output wire [1:0] rx_header,
-  output wire [63:0] rx_data,
+  output wire [1:0]  rx_header,
+  output wire [31:0] rx_data,
+  output wire        rx_header_valid,
 
   input wire link_status,
   input wire gearbox_slip
@@ -636,6 +638,8 @@ module sfp_gty (
     ,.probe_out5 (link_down_latched_reset_vio_int)
   );
 
+  wire [1:0] rxheadervalid_out;
+  wire [6:0] txsequence_in = {{6{1'b0}}, ~tx_header_valid}; // Set txsequence_in[0] = 1'b0 when header is present
 
   // ===================================================================================================================
   // EXAMPLE WRAPPER INSTANCE
@@ -674,11 +678,11 @@ module sfp_gty (
    ,.qpll0outrefclk_out                      (qpll0outrefclk_int)
    ,.rxgearboxslip_in                        (gearbox_slip)
    ,.txheader_in                             (tx_header)
-   ,.txsequence_in                           (txsequence_int)
+   ,.txsequence_in                           (txsequence_in)
    ,.gtpowergood_out                         (gtpowergood_int)
    ,.rxdatavalid_out                         (rxdatavalid_int)
    ,.rxheader_out                            (rxheader_int)
-   ,.rxheadervalid_out                       (rxheadervalid_int)
+   ,.rxheadervalid_out                       (rxheadervalid_out)
    ,.rxpmaresetdone_out                      (rxpmaresetdone_int)
    ,.rxprgdivresetdone_out                   (rxprgdivresetdone_int)
    ,.rxstartofseq_out                        (rxstartofseq_int)
@@ -690,6 +694,8 @@ module sfp_gty (
   assign tx_clk = gtwiz_userclk_tx_usrclk2_int;
 
   assign rx_header = {<< {rxheader_int[1:0]}}; // Flip byte order
-  assign rx_data = {<< {gtwiz_userdata_rx_int}};
+  assign rx_data = {<< {gtwiz_userdata_rx_int[31:0]}};
+
+  assign rx_header_valid = rxheadervalid_out[0];
 
 endmodule

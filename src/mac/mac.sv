@@ -1,17 +1,17 @@
 module mac (
     input  wire        i_txclk,
-    output wire [63:0] o_TXD,
-    output wire [7:0]  o_TXC,
+    output wire [31:0] o_TXD,
+    output wire [3:0]  o_TXC,
 
     input  wire        i_rxclk,
-    input  wire [63:0] i_RXD,
-    input  wire [7:0]  i_RXC
+    input  wire [31:0] i_RXD,
+    input  wire [3:0]  i_RXC
 );
 
-    wire [63:0] RXD_sync;
-    wire [7:0]  RXC_sync;
+    wire [31:0] RXD_sync;
+    wire [3:0]  RXC_sync;
     wire o_empty;
-    receive_synchronizer synch_inst(
+    receive_synchronizer synch_inst (
         .i_txclk(i_txclk),
         .i_rxclk(i_rxclk),
 
@@ -23,8 +23,8 @@ module mac (
         .o_empty(o_empty)
     );
 
-    assign o_TXD = {8{8'h07}};
-    assign o_TXC = 8'hFF;
+    assign o_TXD = {4{8'h07}};
+    assign o_TXC = 4'hF;
 
     sfp_ila sfp_ila (
         .clk(i_txclk),
