@@ -20,6 +20,7 @@ def test_dummy_frame_encoder_runner():
             "--trace-structs",
             f"-I{proj_path / "src"}",
             f"-I{proj_path / "src" / "include"}",
+            f"-I{proj_path / "src" / "mac"}",
             f"-I{proj_path / "src" / "mac" / "tx"}",
         ],
     )

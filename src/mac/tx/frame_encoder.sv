@@ -12,6 +12,16 @@ module frame_encoder (
     output reg [31:0] TXD
 );
 
+    wire [31:0] crc;
+
+    crc_calc crc_calc_inst (
+        .i_clk(i_clk),
+        .i_arst(current_state == X_START),
+        .i_data(TXD),
+        .i_valid(current_state == X_ADDRESS ? 4'hF : i_clientdata_valid),
+        .o_crc(crc)
+    );
+
     reg [1:0]  proc_count;
     reg [2:0]  current_state, next_state;
 
@@ -20,7 +30,7 @@ module frame_encoder (
     localparam X_ADDRESS       = 3'd2;
     localparam X_USER_DATA     = 3'd3;
     localparam X_PAD           = 3'd4; // TODO!: Implement Padding
-    localparam X_FCS           = 3'd5; // TODO!: Implement FCS calculation
+    localparam X_FCS           = 3'd5;
     localparam X_END           = 3'd6;
     localparam X_IFG           = 3'd7;
 
@@ -61,7 +71,7 @@ module frame_encoder (
             default: {TXC, TXD} = 36'd0;
         endcase
         X_USER_DATA: {TXC, TXD} = {4'h0, i_clientdata};
-        X_FCS:       {TXC, TXD} = {4'h0, 32'hE5BFB3A8};
+        X_FCS:       {TXC, TXD} = {4'h0, crc};
         X_END:       {TXC, TXD} = {4'hF, 32'h070707FD};
         X_IFG:       {TXC, TXD} = {4'hF, {4{8'h07}}};
         default:     {TXC, TXD} = {4'hF, {4{8'h07}}};
