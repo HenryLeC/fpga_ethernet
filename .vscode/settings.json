@@ -2,7 +2,7 @@
     "files.exclude": {
         "vivado*.{log,jou}": true
     },
-    "verilog.linting.verilator.arguments": "-y /opt/Vivado/2025.2/data/verilog/src/ -y /opt/Vivado/2025.2/data/verilog/src/unisims/ +incdir+/opt/Vivado/2025.2/data/verilog/src/ +incdir+./src +incdir+./src/include/ +incdir+./src/helpers/",
+    "verilog.linting.verilator.arguments": "-y /opt/Vivado/2025.2/data/verilog/src/ -y /opt/Vivado/2025.2/data/verilog/src/unisims/ +incdir+/opt/Vivado/2025.2/data/verilog/src/ +incdir+./src +incdir+./src/include/ +incdir+./src/helpers/ +incdir+./src/mac/tx",
     "makefile.configureOnOpen": false,
     "cSpell.words": [
         "arst",

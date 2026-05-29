@@ -10,6 +10,10 @@ src/helpers/async_fifo.sv
 src/mac/mac.sv
 src/mac/receive_synchronizer.sv
 
+src/mac/tx/dummy_frame_encoder.sv
+src/mac/tx/dummy_frame.sv
+src/mac/tx/frame_encoder.sv
+
 src/phy/pcs/rx/block_lock_sm.sv
 src/phy/pcs/rx/decoder.sv
 src/phy/pcs/rx/descrambler.sv

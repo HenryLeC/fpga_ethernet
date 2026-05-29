@@ -23,7 +23,7 @@ module top (
     wire        clk_ibuf, clk_100mhz;
     reg  [28:0] ctr_q = 29'd0;
     reg         unused_ctr_q = 1'b0;
-    reg  [31:0] powerup_reset_q = 32'hffffffff;
+    reg  [29:0] powerup_reset_q = 30'hffffffff;
 
     wire sfp0_sda_i;
     wire sfp0_sda_o;
@@ -77,7 +77,7 @@ module top (
 
     always @(posedge clk_100mhz) begin
         if (sfp_npres[0]) begin
-            powerup_reset_q <= 31'hffffffff;
+            powerup_reset_q <= 30'hffffffff;
         end else if (|powerup_reset_q) begin
             powerup_reset_q <= powerup_reset_q - 1;
         end
@@ -177,6 +177,7 @@ module top (
 
     mac mac_inst(
         .i_txclk(tx_clk),
+        .i_arst(|powerup_reset_q),
         .o_TXD(TXD),
         .o_TXC(TXC),
         .i_rxclk(rx_clk),
