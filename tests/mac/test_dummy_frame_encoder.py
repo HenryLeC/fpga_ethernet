@@ -15,6 +15,7 @@ def test_dummy_frame_encoder_runner():
         hdl_toplevel="dummy_frame_encoder",
         always=True,
         waves=True,
+        parameters={"COUNT_BITS": "5"},
         build_args=[
             "--trace-fst",
             "--trace-structs",
@@ -52,6 +53,12 @@ async def test_dummy_frame_encoder(dut):
     await RisingEdge(dut.i_clk)
 
     dut.i_arst.value = 0
+
+    while dut.TXD.value == 0x07070707:
+        await RisingEdge(dut.i_clk)
+
+    while dut.TXD.value != 0x07070707:
+        await RisingEdge(dut.i_clk)
 
     while dut.TXD.value == 0x07070707:
         await RisingEdge(dut.i_clk)

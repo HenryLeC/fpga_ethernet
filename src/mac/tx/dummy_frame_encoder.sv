@@ -1,4 +1,6 @@
-module dummy_frame_encoder (
+module dummy_frame_encoder #(
+    parameter COUNT_BITS=32
+) (
     input wire i_clk,
     input wire i_arst,
 
@@ -11,7 +13,9 @@ module dummy_frame_encoder (
     wire [31:0] data;
     wire [3:0]  valid;
 
-    dummy_frame frame_gen_inst (
+    dummy_frame #(
+        .COUNT_BITS(COUNT_BITS)
+    ) frame_gen_inst (
         .i_clk(i_clk),
         .i_arst(i_arst),
         
