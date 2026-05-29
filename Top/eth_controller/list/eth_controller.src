@@ -8,7 +8,13 @@ src/include/code_defs.svh
 src/helpers/async_fifo.sv
 
 src/mac/mac.sv
+src/mac/crc_calc.sv
 src/mac/receive_synchronizer.sv
+
+src/mac/crc_tables/crc_lookup_0.hex
+src/mac/crc_tables/crc_lookup_1.hex
+src/mac/crc_tables/crc_lookup_2.hex
+src/mac/crc_tables/crc_lookup_3.hex
 
 src/mac/tx/dummy_frame_encoder.sv
 src/mac/tx/dummy_frame.sv
