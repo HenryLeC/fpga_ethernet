@@ -158,17 +158,23 @@ module top (
         .gearbox_slip(gearbox_slip)
     );
 
-    wire rst_sync;
-    reset_synchronizer reset_synchronizer_powerup_reset_q_inst(
+    wire rst_rxsync;
+    reset_synchronizer reset_synchronizer_tx_powerup_reset_q_inst(
         .clk_in(rx_clk),
         .rst_in(|powerup_reset_q),
-        .rst_out(rst_sync)
+        .rst_out(rst_rxsync)
+    );
+    wire rst_txsync;
+    reset_synchronizer reset_synchronizer_rx_powerup_reset_q_inst(
+        .clk_in(tx_clk),
+        .rst_in(|powerup_reset_q),
+        .rst_out(rst_txsync)
     );
 
     wire gearbox_slip, link_status;
 
     block_lock_sm block_lock_inst(
-        .rst_a(rst_sync),
+        .rst_a(rst_rxsync),
         .clk_rx(rx_clk),
         .rx_header(rx_header),
         .gearbox_slip(gearbox_slip),
@@ -177,7 +183,7 @@ module top (
 
     mac mac_inst(
         .i_txclk(tx_clk),
-        .i_arst(|powerup_reset_q),
+        .i_arst(rst_txsync),
         .o_TXD(TXD),
         .o_TXC(TXC),
         .i_rxclk(rx_clk),

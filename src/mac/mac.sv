@@ -34,17 +34,10 @@ module mac (
         .probe4(o_empty)
     );
 
-    wire arst_sync;
-
-    reset_synchronizer reset_sync(
-        .clk_in(i_txclk),
-        .rst_in(i_arst),
-        .rst_out(arst_sync)
-    );
 
     dummy_frame_encoder frame_gen_inst (
         .i_clk(i_txclk),
-        .i_arst(arst_sync),
+        .i_arst(i_arst),
 
         .TXC(o_TXC),
         .TXD(o_TXD)
