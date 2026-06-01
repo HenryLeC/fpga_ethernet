@@ -10,7 +10,7 @@ module dummy_frame #(
     output wire        o_last
 );
 
-    reg [31:0] packet [0:11];
+    reg [31:0] packet [0:7];
 
     initial begin
         packet[0]  = 32'h01000608;
@@ -21,13 +21,9 @@ module dummy_frame #(
         packet[5]  = 32'h00000000;
         packet[6]  = 32'h01010000;
         packet[7]  = 32'h00000101;
-        packet[8]  = 32'h00000000;
-        packet[9]  = 32'h00000000;
-        packet[10] = 32'h00000000;
-        packet[11] = 32'h00000000;
     end
 
-    reg [3:0] pointer = 0;
+    reg [2:0] pointer = 0;
 
     reg [COUNT_BITS - 1:0] counter = 0;
 
@@ -50,6 +46,6 @@ module dummy_frame #(
         o_valid <= {4{&counter}};
     end
     assign o_data = packet[pointer];
-    assign o_last = pointer == 11;
+    assign o_last = pointer == 7;
 
 endmodule

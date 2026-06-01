@@ -18,18 +18,20 @@ module frame_encoder (
         .i_clk(i_clk),
         .i_arst(current_state == X_START),
         .i_data(TXD),
-        .i_valid(current_state == X_ADDRESS ? 4'hF : i_clientdata_valid),
+        .i_valid(current_state == X_ADDRESS ? 4'hF : current_state == X_USER_DATA ? i_clientdata_valid : current_state == X_PAD ? 4'hF : 4'h0),
         .o_crc(crc)
     );
 
     reg [1:0]  proc_count;
     reg [2:0]  current_state, next_state;
 
+    reg [10:0] word_count = 0;
+
     localparam X_IDLE          = 3'd0;
     localparam X_START         = 3'd1;
     localparam X_ADDRESS       = 3'd2;
     localparam X_USER_DATA     = 3'd3;
-    localparam X_PAD           = 3'd4; // TODO!: Implement Padding
+    localparam X_PAD           = 3'd4;
     localparam X_FCS           = 3'd5;
     localparam X_END           = 3'd6;
     localparam X_IFG           = 3'd7;
@@ -46,13 +48,21 @@ module frame_encoder (
             proc_count <= current_state != next_state ? 0 : proc_count + 1;
         end
 
+    initial word_count = 0;
+    always_ff @(posedge i_clk)
+    if (current_state == X_IDLE)
+        word_count <= 0;
+    else if (current_state == X_USER_DATA | current_state == X_PAD)
+        word_count <= word_count + 1;
+
     // Next state computation
     always_comb
     case (current_state)
         X_IDLE:      next_state = i_clientdata_valid == 0 ? X_IDLE : X_START;
         X_START:     next_state = proc_count == 1 ? X_ADDRESS : X_START;
         X_ADDRESS:   next_state = proc_count == 2 ? X_USER_DATA : X_ADDRESS;
-        X_USER_DATA: next_state = i_last ? X_FCS : X_USER_DATA;
+        X_USER_DATA: next_state = i_last ? word_count >= 11 ? X_FCS : X_PAD : X_USER_DATA;
+        X_PAD:       next_state = word_count == 11 ? X_FCS : X_PAD;
         X_FCS:       next_state = X_END;
         X_END:       next_state = X_IFG;
         X_IFG:       next_state = proc_count == 2 ? X_IDLE : X_IFG;
@@ -71,6 +81,7 @@ module frame_encoder (
             default: {TXC, TXD} = 36'd0;
         endcase
         X_USER_DATA: {TXC, TXD} = {4'h0, i_clientdata};
+        X_PAD:       {TXC, TXD} = {4'h0, 32'h0};
         X_FCS:       {TXC, TXD} = {4'h0, crc};
         X_END:       {TXC, TXD} = {4'hF, 32'h070707FD};
         X_IFG:       {TXC, TXD} = {4'hF, {4{8'h07}}};
