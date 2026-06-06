@@ -62,29 +62,42 @@ async def test_crc_calc(dut):
         AxiStreamBus(dut, "s_axis"), dut.i_clk, dut.i_arst, byte_lanes=1
     )
 
-    header = [0x14000054, 0x00003412, 0x00001140, 0x01010101, 0x0100000A]
+    header = [0x00450008, 0x34121400, 0x11400000, 0x01010000, 0x000A0101, 0x0100]
 
-    assert header[2] >> 16 == 0, "Header checksum must be 0 for calculation"
+    assert header[3] & 0xFFFF == 0, "Header checksum must be 0 for calculation"
 
     checksum = 0
-    for dword in header:
-        word_1 = dword & 0xFFFF
-        word_2 = dword >> 16
+    for idx, dword in enumerate(header):
+        if idx == 0:
+            word_1 = 0
+        else:
+            word_1 = dword & 0xFFFF
+        if idx == len(header) - 1:
+            word_2 = 0
+        else:
+            word_2 = dword >> 16
 
         checksum = ones_complement_sum(checksum, word_1)
         checksum = ones_complement_sum(checksum, word_2)
 
     checksum = (checksum & 0xFFFF) ^ 0xFFFF
 
-    header[2] = header[2] | (checksum << 16)
+    header[3] = header[3] | checksum
 
     checksum = 0
-    for dword in header:
-        word_1 = dword & 0xFFFF
-        word_2 = dword >> 16
+    for idx, dword in enumerate(header):
+        if idx == 0:
+            word_1 = 0
+        else:
+            word_1 = dword & 0xFFFF
+        if idx == len(header) - 1:
+            word_2 = 0
+        else:
+            word_2 = dword >> 16
 
         checksum = ones_complement_sum(checksum, word_1)
         checksum = ones_complement_sum(checksum, word_2)
+
     assert checksum & 0xFFFF == 0xFFFF, f"{checksum:08x} != FFFFFFFF"
 
     dut.i_arst.value = 1

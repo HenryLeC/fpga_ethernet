@@ -33,17 +33,17 @@ module ipv4_header_decode #(
     wire [15:0] checksum_check_next;
     ones_complement_adder checksum_adder_1 (
         checksum_check,
-        s_axis_tdata[15:0],
+        |word_count ? s_axis_tdata[15:0] : 16'h0, // Don't add EtherType on dword 0
         checksum_check_int
     );
     
     ones_complement_adder checksum_adder_2 (
         checksum_check_int,
-        s_axis_tdata[31:16],
+        last_dword ? 16'h0 : s_axis_tdata[31:16], // Don't add start of packet on last dword
         checksum_check_next
     );
 
-    wire last_dword = s_axis_tvalid && |word_count && word_count == (ihl - 1);
+    wire last_dword = s_axis_tvalid && |word_count && word_count == (ihl);
 
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
@@ -72,19 +72,26 @@ module ipv4_header_decode #(
                 end
                 
                 case (word_count)
-                4'd0: begin
-                    invalid <= invalid | s_axis_tdata[3:0] != 4'd4 | s_axis_tdata[7:4] < 5;
-                    ihl <= s_axis_tdata[7:4];
-                    packet_length <= {s_axis_tdata[23:16], s_axis_tdata[31:24]};
+                4'd0: begin // EtherType, Version, IHL, DSCP, ECN
+                    invalid <= s_axis_tdata[15:0] != 16'h0008 // EtherType
+                        | s_axis_tdata[23:20] != 4'd4 // Version
+                        | s_axis_tdata[19:16] < 5; // IHL
+                    ihl <= s_axis_tdata[19:16]; // IHL
                 end
-                4'd1:
-                    identification <= {s_axis_tdata[7:0], s_axis_tdata[15:8]};
-                4'd2:
-                    protocol <= s_axis_tdata[15:8];
-                4'd3:
-                    source_address <= {s_axis_tdata[7:0], s_axis_tdata[15:8], s_axis_tdata[23:16], s_axis_tdata[31:24]};
-                4'd4:
-                    destination_address <= {s_axis_tdata[7:0], s_axis_tdata[15:8], s_axis_tdata[23:16], s_axis_tdata[31:24]};
+                4'd1: begin // Total Length, Identification
+                    identification  <= {s_axis_tdata[23:16], s_axis_tdata[31:24]};
+                    packet_length <= {s_axis_tdata[7:0], s_axis_tdata[15:8]};
+                end
+                4'd2: // Flags, Fragment Offset, TTL, Protocol
+                    protocol <= s_axis_tdata[31:24];
+                4'd3: // Header Checksum, Source Address[15:0]
+                    source_address <= {s_axis_tdata[23:16], s_axis_tdata[31:24], 16'h0};
+                4'd4: begin // Source Address[31:16], Destination Address [15:0]
+                    source_address <= {source_address[31:16], s_axis_tdata[7:0], s_axis_tdata[15:8]};
+                    destination_address <= {s_axis_tdata[23:16], s_axis_tdata[31:24], 16'h0};
+                end
+                4'd5: // Destination Address [15:0], Options?[15:0]
+                    destination_address <= {destination_address[31:16], s_axis_tdata[7:0], s_axis_tdata[15:8]};
                 default: begin end
                 endcase
 
