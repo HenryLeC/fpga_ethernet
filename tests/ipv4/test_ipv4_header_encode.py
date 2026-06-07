@@ -21,6 +21,7 @@ def test_ipv4_header_encode_runner():
             "--trace-structs",
             f"-I{proj_path / "src"}",
             f"-I{proj_path / "src" / "include"}",
+            f"-I{proj_path / "src" / "ipv4" / "header"}",
         ],
     )
     runner.test(
@@ -68,7 +69,6 @@ async def test_crc_calc(dut):
     dut.packet_length.value = 20
     dut.identification.value = 0x1234
     dut.protocol.value = 17
-    dut.checksum.value = header[3] & 0xFFFF
     dut.source_address.value = 0x01010101
     dut.destination_address.value = 0x0A000001
     dut.data_valid.value = 1
@@ -76,6 +76,13 @@ async def test_crc_calc(dut):
     dut.m_axis_tready.value = 1
     await RisingEdge(dut.m_axis_tvalid)
     await FallingEdge(dut.i_clk)
+
+    for idx, dword in enumerate(header):
+        assert dut.m_axis_tdata.value == dword
+        if idx == len(header) - 1:
+            assert dut.m_axis_tlast.value
+
+        await FallingEdge(dut.i_clk)
 
     for idx, dword in enumerate(header):
         assert dut.m_axis_tdata.value == dword
