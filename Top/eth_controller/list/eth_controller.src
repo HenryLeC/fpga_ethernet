@@ -20,6 +20,9 @@ src/mac/tx/dummy_frame_encoder.sv
 src/mac/tx/dummy_frame.sv
 src/mac/tx/frame_encoder.sv
 
+src/ipv4/header/checksum_calc.sv
+src/ipv4/header/ipv4_header_encode.sv
+
 src/phy/pcs/rx/block_lock_sm.sv
 src/phy/pcs/rx/decoder.sv
 src/phy/pcs/rx/descrambler.sv
