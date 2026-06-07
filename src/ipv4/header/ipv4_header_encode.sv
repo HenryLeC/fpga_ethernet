@@ -6,7 +6,7 @@ module ipv4_header_encode #(
     
     output logic        m_axis_tvalid,
     output logic [31:0] m_axis_tdata,
-    input  logic        m_axis_tready,
+    input  wire         m_axis_tready,
     output logic        m_axis_tlast,
 
     input  wire  [15:0] packet_length,
@@ -26,7 +26,7 @@ module ipv4_header_encode #(
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
         dword_count <= 1;
-    else if (next_state & current_state & m_axis_tready)
+    else if (next_state & current_state & m_axis_tready & check_valid)
         dword_count <= dword_count + 1;
     else
         dword_count <= 1;
@@ -39,7 +39,7 @@ module ipv4_header_encode #(
 
     always_comb
     case (current_state)
-        X_IDLE: next_state = data_valid ? X_DATA : X_IDLE;
+        X_IDLE: next_state = data_valid & m_axis_tready & check_valid ? X_DATA : X_IDLE;
         X_DATA: next_state = (dword_count == 5 & m_axis_tready) ? X_IDLE : X_DATA;
     endcase
 
@@ -62,20 +62,22 @@ module ipv4_header_encode #(
     end
 
     wire [15:0] checksum;
+    wire check_valid;
     checksum_calc #(
         .TTL(TTL)
     ) checksum_calc_inst (
         .i_clk(i_clk),
-        .i_arst(i_arst),
+        .i_arst(i_arst | m_axis_tlast),
 
         .packet_length(packet_length),
         .identification(identification),
         .protocol(protocol),
         .source_address(source_address),
         .destination_address(destination_address),
-        .data_valid(data_valid & !current_state),
+        .data_valid(data_valid),
 
-        .checksum(checksum)
+        .checksum(checksum),
+        .checksum_valid(check_valid)
     );
 
 endmodule

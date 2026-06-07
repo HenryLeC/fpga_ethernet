@@ -73,9 +73,10 @@ async def test_crc_calc(dut):
     dut.destination_address.value = 0x0A000001
     dut.data_valid.value = 1
 
+    dut.m_axis_tready.value = 0
+    for _ in range(5):
+        await FallingEdge(dut.i_clk)
     dut.m_axis_tready.value = 1
-    await RisingEdge(dut.m_axis_tvalid)
-    await FallingEdge(dut.i_clk)
 
     for idx, dword in enumerate(header):
         assert dut.m_axis_tdata.value == dword
@@ -83,6 +84,15 @@ async def test_crc_calc(dut):
             assert dut.m_axis_tlast.value
 
         await FallingEdge(dut.i_clk)
+
+    dut.m_axis_tready.value = 0
+    dut.data_valid.value = 0
+    for _ in range(5):
+        await FallingEdge(dut.i_clk)
+    dut.data_valid.value = 1
+    for _ in range(5):
+        await FallingEdge(dut.i_clk)
+    dut.m_axis_tready.value = 1
 
     for idx, dword in enumerate(header):
         assert dut.m_axis_tdata.value == dword
