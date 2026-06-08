@@ -12,9 +12,9 @@ module dummy_udp_data_stream (
     logic [31:0] data [0:2];
 
     initial begin
-        data[0] = 32'h48454C4C;
-        data[1] = 32'h4F20574F;
-        data[2] = 32'h524C4421;
+        data[0] = 32'h4C4C4548;
+        data[1] = 32'h4F57204F;
+        data[2] = 32'h21444C52;
     end
 
     logic [1:0] pointer = 0;
