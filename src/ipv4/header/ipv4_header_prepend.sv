@@ -73,7 +73,7 @@ module ipv4_header_prepend #(
     end
 
     logic [15:0] data_upper_bytes = 0;
-    always_ff @(posedge i_clk or i_arst)
+    always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
         data_upper_bytes <= 0;
     else if (data_axis_tready)
