@@ -15,6 +15,8 @@ module checksum_calc #(
     output wire         checksum_valid
 );
 
+    assign checksum = ~curr_checksum;
+
     // We have 3 clock cycles from data begin valid to generate the checksum
     // We also have 9 blocks we need to add for the checksum.
     wire [15:0] intermediate_sum_1, intermediate_sum_2;
@@ -22,8 +24,9 @@ module checksum_calc #(
     wire [15:0] sum_out;
     logic [15:0] block_1, block_2, block_3;
     
+    reg [15:0] curr_checksum;
     ones_complement_adder adder_1 (
-        .a(checksum),
+        .a(curr_checksum),
         .b(block_1),
         .sum(intermediate_sum_1)
     );
@@ -52,12 +55,12 @@ module checksum_calc #(
     else
         cycle_count <= cycle_count + 1;
 
-    initial checksum = 0;
+    initial curr_checksum = 0;
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
-        checksum <= 0;
+        curr_checksum <= 0;
     else if (cycle_count < 3 & data_valid)
-        checksum <= sum_out;
+        curr_checksum <= sum_out;
 
     always_comb
     case (cycle_count)

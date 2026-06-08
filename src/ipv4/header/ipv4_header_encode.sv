@@ -54,7 +54,7 @@ module ipv4_header_encode #(
         case (dword_count)
             3'd1: m_axis_tdata = {identification[7:0], identification[15:8], packet_length[7:0], packet_length[15:8]}; // Packet Length, Identification
             3'd2: m_axis_tdata = {protocol, 8'h40, 16'h0}; // Flags, Fragment Offset, TTL, Protocol
-            3'd3: m_axis_tdata = {source_address[23:16], source_address[31:24], checksum[7:0], checksum[15:8]}; // Checksum, Source Address[31:16]
+            3'd3: m_axis_tdata = {source_address[23:16], source_address[31:24], checksum}; // Checksum, Source Address[31:16]
             3'd4: m_axis_tdata = {destination_address[23:16], destination_address[31:24], source_address[7:0], source_address[15:8]};
             3'd5: m_axis_tdata = {16'h0, destination_address[7:0], destination_address[15:8]};
             default: m_axis_tdata = 32'h0;

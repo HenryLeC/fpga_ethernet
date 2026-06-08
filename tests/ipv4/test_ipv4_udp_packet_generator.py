@@ -80,7 +80,7 @@ async def test_ipv4_udp_packet_generator(dut):
         0x00450008,
         0x34122800,
         0x11400000,
-        0x0101A56E,
+        0x0101915A,
         0x000A0101,
         0x8080FF01,
         0x14008080,
