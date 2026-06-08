@@ -22,6 +22,12 @@ src/mac/tx/frame_encoder.sv
 
 src/ipv4/header/checksum_calc.sv
 src/ipv4/header/ipv4_header_encode.sv
+src/ipv4/header/ipv4_header_prepend.sv
+
+src/ipv4/udp/udp_packet_encode.sv
+
+src/ipv4/dummy_udp_data_stream.sv
+src/ipv4/ipv4_udp_packet_generator.sv
 
 src/phy/pcs/rx/block_lock_sm.sv
 src/phy/pcs/rx/decoder.sv

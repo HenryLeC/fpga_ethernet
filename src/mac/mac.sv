@@ -51,7 +51,11 @@ module mac (
         .TXD(o_TXD)
     );
 
-    ipv4_header_encode header_generator (
+    wire [31:0] udp_data_tdata;
+    wire [15:0] udp_data_tlength;
+    wire udp_data_tready, udp_data_tvalid, udp_data_tlast;
+
+    ipv4_udp_packet_generator packet_generator (
         .i_clk(i_txclk),
         .i_arst(i_arst),
         
@@ -60,13 +64,22 @@ module mac (
         .m_axis_tready(ready),
         .m_axis_tlast(last),
 
-        .packet_length(16'd20),
-        .identification(16'h1234),
-        .protocol(8'd17),
-        .source_address(32'h01010101),
-        .destination_address(32'h0A0001FF),
-        .data_valid(1)
+        .s_axis_tdata(udp_data_tdata),
+        .s_axis_tvalid(udp_data_tvalid),
+        .s_axis_tready(udp_data_tready),
+        .s_axis_tlast(udp_data_tlast),
+        .s_axis_tlen(udp_data_tlength)
+    );
 
+    dummy_udp_data_stream udp_data_stream_inst(
+        .i_clk(i_txclk),
+        .i_arst(i_arst),
+
+        .m_axis_tvalid(udp_data_tvalid),
+        .m_axis_tdata(udp_data_tdata),
+        .m_axis_tready(udp_data_tready),
+        .m_axis_tlast(udp_data_tlast),
+        .m_axis_tlength(udp_data_tlength)
     );
 
 endmodule
