@@ -111,7 +111,7 @@ async def test_crc_calc(dut):
     await source.send(frame)
     await frame.tx_complete.wait()
 
-    await RisingEdge(dut.s_axis_tdone)
+    await RisingEdge(dut.decode_done)
 
     assert dut.packet_length.value == 20
     assert dut.identification.value == 0x1234

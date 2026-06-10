@@ -7,8 +7,11 @@ module ipv4_header_decode #(
     input  wire        s_axis_tvalid,
     input  wire [31:0] s_axis_tdata,
     output logic       s_axis_tready,
-    output logic       s_axis_tdone,
+    output logic       s_axis_tlast, // This is the wrong direction for a compliant axi stream
+                                     // but in this case the master does not know when the headier
+                                     // is finished.
 
+    output logic      decode_done,
     output reg        header_valid,
 
     output reg [15:0] packet_length,
@@ -110,7 +113,8 @@ module ipv4_header_decode #(
 
     always_comb begin
         s_axis_tready = state == X_READ;
-        s_axis_tdone  = state == X_RESET;
+        decode_done = state == X_RESET;
+        s_axis_tlast  = last_dword;
     end
 
 endmodule
