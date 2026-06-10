@@ -26,7 +26,7 @@ def test_async_fifo_runner():
         hdl_toplevel="async_fifo",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../async_fifo.fst"],
+        test_args=["--trace-file", "../wave/async_fifo.fst"],
     )
 
 

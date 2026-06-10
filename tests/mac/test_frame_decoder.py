@@ -27,7 +27,7 @@ def test_frame_decoder_runner():
         hdl_toplevel="frame_decoder",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../frame_decoder.fst"],
+        test_args=["--trace-file", "../wave/frame_decoder.fst"],
     )
 
 

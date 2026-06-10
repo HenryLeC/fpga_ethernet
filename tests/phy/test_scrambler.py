@@ -24,7 +24,7 @@ def test_scrambler_runner():
         hdl_toplevel="scrambler",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../scrambler.fst"],
+        test_args=["--trace-file", "../wave/scrambler.fst"],
     )
 
 

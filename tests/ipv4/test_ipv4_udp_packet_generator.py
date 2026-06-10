@@ -32,7 +32,7 @@ def test_udp_packet_encode_runner():
         hdl_toplevel="ipv4_udp_packet_generator",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../ipv4_udp_packet_generator.fst"],
+        test_args=["--trace-file", "../wave/ipv4_udp_packet_generator.fst"],
     )
 
 

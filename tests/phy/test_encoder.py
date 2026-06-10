@@ -26,7 +26,7 @@ def test_encoder_runner():
         hdl_toplevel="encoder",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../encoder.fst"],
+        test_args=["--trace-file", "../wave/encoder.fst"],
     )
 
 

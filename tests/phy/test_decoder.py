@@ -26,7 +26,7 @@ def test_decoder_runner():
         hdl_toplevel="decoder",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../decoder.fst"],
+        test_args=["--trace-file", "../wave/decoder.fst"],
     )
 
 

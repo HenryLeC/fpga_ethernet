@@ -29,7 +29,7 @@ def test_udp_packet_encode_runner():
         hdl_toplevel="udp_packet_encode",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../udp_packet_encode.fst"],
+        test_args=["--trace-file", "../wave/udp_packet_encode.fst"],
     )
 
 

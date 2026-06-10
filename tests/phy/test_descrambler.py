@@ -21,7 +21,7 @@ def test_descrambler_runner():
         hdl_toplevel="descrambler",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../descrambler.fst"],
+        test_args=["--trace-file", "../wave/descrambler.fst"],
     )
 
 

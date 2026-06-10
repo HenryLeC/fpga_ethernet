@@ -30,7 +30,7 @@ def test_ipv4_header_decode_runner():
         hdl_toplevel="ipv4_header_decode",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../ipv4_header_decode.fst"],
+        test_args=["--trace-file", "../wave/ipv4_header_decode.fst"],
     )
 
 

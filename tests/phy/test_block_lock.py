@@ -27,7 +27,7 @@ def test_block_lock_runner():
         hdl_toplevel="block_lock_sm",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../block_lock_sm.fst"],
+        test_args=["--trace-file", "../wave/block_lock_sm.fst"],
     )
 
 

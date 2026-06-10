@@ -28,7 +28,7 @@ def test_pcs_tx_runner():
         hdl_toplevel="pcs_tx",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../pcs_tx.fst"],
+        test_args=["--trace-file", "../wave/pcs_tx.fst"],
     )
 
 

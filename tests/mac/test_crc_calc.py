@@ -37,7 +37,7 @@ def test_crc_calc_runner():
         hdl_toplevel="crc_calc",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../crc_calc.fst"],
+        test_args=["--trace-file", "../wave/crc_calc.fst"],
     )
 
 

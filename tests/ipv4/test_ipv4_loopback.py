@@ -32,7 +32,7 @@ def test_ipv4_loopback_runner():
         hdl_toplevel="tb_ipv4_loopback",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../tb_ipv4_loopback.fst"],
+        test_args=["--trace-file", "../wave/tb_ipv4_loopback.fst"],
     )
 
 

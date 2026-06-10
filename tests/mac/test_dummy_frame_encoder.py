@@ -29,7 +29,7 @@ def test_dummy_frame_encoder_runner():
         hdl_toplevel="dummy_frame_encoder",
         test_module=__name__,
         waves=True,
-        test_args=["--trace-file", "../dummy_frame_encoder.fst"],
+        test_args=["--trace-file", "../wave/dummy_frame_encoder.fst"],
     )
 
 
