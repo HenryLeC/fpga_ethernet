@@ -22,6 +22,7 @@ def test_ipv4_header_decode_runner():
             "--trace-fst",
             "--trace-structs",
             f"-I{proj_path / "src"}",
+            f"-I{proj_path / "src" / "helpers"}",
             f"-I{proj_path / "src" / "include"}",
         ],
     )

@@ -21,6 +21,7 @@ def test_udp_packet_encode_runner():
             "--trace-fst",
             "--trace-structs",
             f"-I{proj_path / "src"}",
+            f"-I{proj_path / "src" / "helpers"}",
             f"-I{proj_path / "src" / "include"}",
             f"-I{proj_path / "src" / "ipv4" / "udp"}",
             f"-I{proj_path / "src" / "ipv4" / "header"}",

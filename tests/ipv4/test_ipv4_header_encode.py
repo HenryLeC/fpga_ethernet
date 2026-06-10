@@ -20,6 +20,7 @@ def test_ipv4_header_encode_runner():
             "--trace-fst",
             "--trace-structs",
             f"-I{proj_path / "src"}",
+            f"-I{proj_path / "src" / "helpers"}",
             f"-I{proj_path / "src" / "include"}",
             f"-I{proj_path / "src" / "ipv4" / "header"}",
         ],
