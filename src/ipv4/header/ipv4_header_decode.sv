@@ -4,8 +4,8 @@ module ipv4_header_decode #(
     input wire i_clk,
     input wire i_arst,
 
-    input  wire        s_axis_tvalid,
     input  wire [31:0] s_axis_tdata,
+    input  wire        s_axis_tvalid,
     output logic       s_axis_tready,
     output logic       s_axis_tlast, // This is the wrong direction for a compliant axi stream
                                      // but in this case the master does not know when the headier
@@ -116,17 +116,5 @@ module ipv4_header_decode #(
         decode_done = state == X_RESET;
         s_axis_tlast  = last_dword;
     end
-
-endmodule
-
-module ones_complement_adder #(parameter N=16) (
-    input  wire [N-1:0] a,
-    input  wire [N-1:0] b,
-    output wire [N-1:0] sum
-);
-    wire [N:0] full_sum;
-    assign full_sum = a + b;
-
-    assign sum = full_sum[N-1:0] + {{(N-1){1'b0}}, full_sum[N]};
 
 endmodule
