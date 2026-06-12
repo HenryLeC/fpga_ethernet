@@ -77,5 +77,7 @@ async def test_ipv4_loopback(dut):
 
     recv_data = await sink.read()
 
+    assert dut.m_axis_tlen.value == 12
+
     for tx, rx in zip(data, recv_data):
         assert tx == rx

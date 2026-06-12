@@ -74,7 +74,7 @@ module ipv4_udp_packet_decoder (
 
         .source_port(),
         .destination_port(),
-        .data_length()
+        .data_length(m_axis_tlen)
     );
 
 endmodule
