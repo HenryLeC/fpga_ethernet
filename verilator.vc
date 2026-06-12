@@ -1,0 +1,12 @@
+-y /opt/Vivado/2025.2/data/verilog/src/
+-y /opt/Vivado/2025.2/data/verilog/src/unisims/ 
++incdir+/opt/Vivado/2025.2/data/verilog/src/ 
+
+-y ./src/
+-y ./src/helpers/
+-y ./src/mac/tx/
+-y ./src/ipv4/
+-y ./src/ipv4/header/
+-y ./src/ipv4/udp/
+
++incdir+./src/include
