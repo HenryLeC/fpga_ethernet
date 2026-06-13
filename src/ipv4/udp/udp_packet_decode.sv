@@ -23,6 +23,7 @@ module udp_packet_decode #(
     localparam X_IDLE = 2'd0;
     localparam X_HEAD = 2'd1;
     localparam X_DATA = 2'd2;
+    localparam X_LOCK = 2'd3;
 
     reg [1:0] current_state = X_IDLE;
     reg [1:0] next_state;
@@ -37,7 +38,8 @@ module udp_packet_decode #(
     case (current_state)
         X_IDLE: next_state = s_axis_tvalid ? X_HEAD : X_IDLE;
         X_HEAD: next_state = X_DATA;
-        X_DATA: next_state = s_axis_tlast ? X_IDLE : X_DATA;
+        X_DATA: next_state = m_axis_tlast ? X_LOCK : X_DATA;
+        X_LOCK: next_state = s_axis_tvalid ? X_LOCK : X_IDLE;
         default: next_state = X_IDLE;
     endcase
 
@@ -77,7 +79,7 @@ module udp_packet_decode #(
     X_DATA: begin
         m_axis_tdata = s_axis_tdata;
         m_axis_tvalid = 1;
-        m_axis_tlast = dword_counter + 4 == full_length;
+        m_axis_tlast = dword_counter + 4 >= full_length;
     end
     default: begin
         m_axis_tdata = 0;
