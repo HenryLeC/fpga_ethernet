@@ -6,6 +6,7 @@ src/i2c/cycle_timer.sv
 src/include/code_defs.svh
 
 src/helpers/async_fifo.sv
+src/helpers/sync_fifo.sv
 src/helpers/ones_complement_adder.sv
 
 src/mac/mac.sv
@@ -17,17 +18,22 @@ src/mac/crc_tables/crc_lookup_1.hex
 src/mac/crc_tables/crc_lookup_2.hex
 src/mac/crc_tables/crc_lookup_3.hex
 
+src/mac/rx/frame_decoder.sv
+
 src/mac/tx/dummy_frame_encoder.sv
 src/mac/tx/dummy_frame.sv
 src/mac/tx/frame_encoder.sv
 
 src/ipv4/header/checksum_calc.sv
+src/ipv4/header/ipv4_header_decode.sv
 src/ipv4/header/ipv4_header_encode.sv
 src/ipv4/header/ipv4_header_prepend.sv
+src/ipv4/header/ipv4_header_remove.sv
 
 src/ipv4/udp/udp_packet_encode.sv
+src/ipv4/udp/udp_packet_decode.sv
 
-src/ipv4/dummy_udp_data_stream.sv
+src/ipv4/ipv4_udp_packet_decoder.sv
 src/ipv4/ipv4_udp_packet_generator.sv
 
 src/phy/pcs/rx/block_lock_sm.sv
@@ -50,3 +56,4 @@ src/phy/pma/helpers/sfp_gty_0_prbs_any.v
 IP/sfp_ila/sfp_ila.xci
 IP/sfp_gty_0/sfp_gty_0.xci
 IP/sfp_gty_0_vio_0/sfp_gty_0_vio_0.xci
+IP/mac_vio/mac_vio.xci

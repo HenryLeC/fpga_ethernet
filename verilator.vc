@@ -4,7 +4,9 @@
 
 -y ./src/
 -y ./src/helpers/
+-y ./src/mac/
 -y ./src/mac/tx/
+-y ./src/mac/rx/
 -y ./src/ipv4/
 -y ./src/ipv4/header/
 -y ./src/ipv4/udp/

@@ -103,3 +103,4 @@ _info
 sim_build/
 venv
 *.fst
+*.ron
