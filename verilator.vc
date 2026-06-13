@@ -4,11 +4,15 @@
 
 -y ./src/
 -y ./src/helpers/
--y ./src/mac/
--y ./src/mac/tx/
--y ./src/mac/rx/
 -y ./src/ipv4/
 -y ./src/ipv4/header/
 -y ./src/ipv4/udp/
+-y ./src/mac/
+-y ./src/mac/tx/
+-y ./src/mac/rx/
+-y ./src/phy/
+-y ./src/phy/pcs/
+-y ./src/phy/pcs/rx/
+-y ./src/phy/pcs/tx/
 
 +incdir+./src/include

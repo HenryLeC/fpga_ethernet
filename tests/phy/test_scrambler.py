@@ -18,6 +18,8 @@ def test_scrambler_runner():
         build_args=[
             "--trace-fst",
             "--trace-structs",
+            "-F",
+            f"{proj_path / "verilator.vc"}",
         ],
     )
     runner.test(

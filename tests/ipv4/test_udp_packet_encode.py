@@ -20,9 +20,8 @@ def test_udp_packet_encode_runner():
         build_args=[
             "--trace-fst",
             "--trace-structs",
-            f"-I{proj_path / "src"}",
-            f"-I{proj_path / "src" / "include"}",
-            f"-I{proj_path / "src" / "ipv4" / "udp"}",
+            "-F",
+            f"{proj_path / "verilator.vc"}",
         ],
     )
     runner.test(

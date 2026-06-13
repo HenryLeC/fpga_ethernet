@@ -19,9 +19,8 @@ def test_pcs_tx_runner():
         build_args=[
             "--trace-fst",
             "--trace-structs",
-            f"-I{proj_path / "src"}",
-            f"-I{proj_path / "src" / "include"}",
-            f"-I{proj_path / "src" / "phy" / "pcs" / "tx"}",
+            "-F",
+            f"{proj_path / "verilator.vc"}",
         ],
     )
     runner.test(

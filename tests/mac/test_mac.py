@@ -2,7 +2,7 @@ from pathlib import Path
 
 import cocotb
 from cocotb_tools.runner import get_runner
-from cocotb.triggers import FallingEdge, RisingEdge, Timer
+from cocotb.triggers import RisingEdge, Timer
 
 import csv
 
@@ -20,15 +20,8 @@ def test_mac_runner():
         build_args=[
             "--trace-fst",
             "--trace-structs",
-            f"-I{proj_path / "src"}",
-            f"-I{proj_path / "src" / "helpers"}",
-            f"-I{proj_path / "src" / "include"}",
-            f"-I{proj_path / "src" / "mac"}",
-            f"-I{proj_path / "src" / "mac" / "rx"}",
-            f"-I{proj_path / "src" / "mac" / "tx"}",
-            f"-I{proj_path / "src" / "ipv4"}",
-            f"-I{proj_path / "src" / "ipv4" / "udp"}",
-            f"-I{proj_path / "src" / "ipv4" / "header"}",
+            "-F",
+            f"{proj_path / "verilator.vc"}",
             f"-I{Path(__file__).resolve().parent / "./mocks"}",
         ],
     )

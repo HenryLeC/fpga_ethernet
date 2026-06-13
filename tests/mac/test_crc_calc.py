@@ -29,8 +29,8 @@ def test_crc_calc_runner():
         build_args=[
             "--trace-fst",
             "--trace-structs",
-            f"-I{proj_path / "src"}",
-            f"-I{proj_path / "src" / "include"}",
+            "-F",
+            f"{proj_path / "verilator.vc"}",
         ],
     )
     runner.test(
