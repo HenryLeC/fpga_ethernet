@@ -1,3 +1,5 @@
+`ifndef CODE_DEFS_SVH
+`define CODE_DEFS_SVH
 package code_defs;
 
     // RS Code - Table 46-3
@@ -36,3 +38,4 @@ package code_defs;
     , BT_T7 = 8'hFF
     } bt_code_t;
 endpackage
+`endif

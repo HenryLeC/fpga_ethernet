@@ -2,7 +2,7 @@
 `default_nettype none
 module frame_decoder #(
     parameter PORT_MAC_ADDR = 48'h000000000000,
-    parameter PORT_MAX_MASK = 48'hFFFFFFFFFFFF
+    parameter PORT_MAX_MASK = 48'h000000000000
 ) (
     input  wire        i_clk,
     input  wire        i_arst,
