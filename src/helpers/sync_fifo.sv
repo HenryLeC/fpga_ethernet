@@ -50,8 +50,10 @@ module sync_fifo #(
 
     assign m_tdata = mem[raddr];
 
-    always_ff @(posedge i_clk)
-    if (s_tvalid & s_tready)
+    always_ff @(posedge i_clk or posedge i_arst)
+    if (i_arst)
+        mem[0] <= 0;
+    else if (s_tvalid & s_tready)
         mem[waddr] <= s_tdata;
 
 endmodule

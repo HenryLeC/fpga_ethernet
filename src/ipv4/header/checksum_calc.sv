@@ -43,13 +43,16 @@ module checksum_calc #(
     );
 
     logic [1:0] cycle_count;
+    logic blocks_valid;
 
     initial cycle_count = 0;
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
         cycle_count <= 0;
+    else if (!blocks_valid)
+        cycle_count <= 0;
     else if (cycle_count == 0)
-        cycle_count <= data_valid ? 1 : 0;
+        cycle_count <= blocks_valid ? 1 : 0;
     else if (cycle_count == 3)
         cycle_count <= cycle_count;
     else
@@ -59,28 +62,37 @@ module checksum_calc #(
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
         curr_checksum <= 0;
-    else if (cycle_count < 3 & data_valid)
+    else if (!data_valid)
+        curr_checksum <= 0;
+    else if (cycle_count < 3 & blocks_valid)
         curr_checksum <= sum_out;
 
-    always_comb
+    always_ff @(posedge i_clk) begin
+    if (!blocks_valid) begin
+        block_1 <= 16'h0045; // Version, IHL, DSCP, ECN
+        block_2 <= {packet_length[7:0], packet_length[15:8]}; // Total Length
+        block_3 <= {identification[7:0], identification[15:8]}; // Identification
+    end else
     case (cycle_count)
     2'd0: begin
-        block_1 = 16'h0045; // Version, IHL, DSCP, ECN
-        block_2 = {packet_length[7:0], packet_length[15:8]}; // Total Length
-        block_3 = {identification[7:0], identification[15:8]}; // Identification
-    end
-    2'd1: begin
-        block_1 = 16'h0; // Flags, Fragment Offset
-        block_2 = {protocol, TTL}; // TTL, Protocol
+        block_1 <= 16'h0; // Flags, Fragment Offset
+        block_2 <= {protocol, TTL}; // TTL, Protocol
         block_3 = {source_address[23:16], source_address[31:24]}; // Source Address [31:16]
     end 
-    2'd2: begin
-        block_1 = {source_address[7:0], source_address[15:8]};
-        block_2 = {destination_address[23:16], destination_address[31:24]};
-        block_3 = {destination_address[7:0], destination_address[15:8]};
+    2'd1: begin
+        block_1 <= {source_address[7:0], source_address[15:8]};
+        block_2 <= {destination_address[23:16], destination_address[31:24]};
+        block_3 <= {destination_address[7:0], destination_address[15:8]};
     end
-    default: {block_1, block_2, block_3} = {3{16'h0}};
+    default: {block_1, block_2, block_3} <= {3{16'h0}};
     endcase
+    end
 
+    always_ff @(posedge i_clk or posedge i_arst)
+    if (i_arst)
+        blocks_valid <= 0;
+    else
+        blocks_valid <= data_valid;
     assign checksum_valid = cycle_count == 2'd3;
+
 endmodule
