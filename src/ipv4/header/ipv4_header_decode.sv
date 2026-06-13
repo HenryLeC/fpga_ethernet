@@ -12,7 +12,7 @@ module ipv4_header_decode #(
                                      // is finished.
 
     output logic      decode_done,
-    output reg        header_valid,
+    output logic      header_valid,
 
     output reg [15:0] packet_length,
     output reg [15:0] identification,
@@ -34,15 +34,19 @@ module ipv4_header_decode #(
     reg  [15:0] checksum_check;
     wire [15:0] checksum_check_int;
     wire [15:0] checksum_check_next;
+
+    logic [31:0] s_axis_tdata_prev;
+    logic [ 3:0] word_count_prev;
+    logic        last_dword_prev, s_axis_tvalid_prev, s_axis_tready_prev;
     ones_complement_adder checksum_adder_1 (
         checksum_check,
-        |word_count ? s_axis_tdata[15:0] : 16'h0, // Don't add EtherType on dword 0
+        |word_count_prev ? s_axis_tdata_prev[15:0] : 16'h0, // Don't add EtherType on dword 0
         checksum_check_int
     );
     
     ones_complement_adder checksum_adder_2 (
         checksum_check_int,
-        last_dword ? 16'h0 : s_axis_tdata[31:16], // Don't add start of packet on last dword
+        last_dword_prev ? 16'h0 : s_axis_tdata_prev[31:16], // Don't add start of packet on last dword
         checksum_check_next
     );
 
@@ -53,11 +57,20 @@ module ipv4_header_decode #(
         state <= X_RESET;
     else begin
         state <= next_state;
+        s_axis_tdata_prev <= s_axis_tdata;
+        word_count_prev <= word_count;
+        last_dword_prev <= last_dword;
+        s_axis_tvalid_prev <= s_axis_tvalid;
+        s_axis_tready_prev <= s_axis_tready;
+        if (!s_axis_tvalid_prev)
+            checksum_check <= 0;
+        else if (s_axis_tvalid_prev & s_axis_tready_prev)
+            checksum_check <= checksum_check_next;
+
         case (state)
             X_RESET: begin
                 invalid <= 0;
 
-                header_valid <= 0;
                 ihl <= 0;
                 packet_length <= 0;
                 identification <= 0;
@@ -71,7 +84,6 @@ module ipv4_header_decode #(
             X_READ: begin
                 if (s_axis_tvalid && s_axis_tready) begin
                     word_count <= word_count + 1;
-                    checksum_check <= checksum_check_next;
                 end
                 
                 case (word_count)
@@ -97,10 +109,6 @@ module ipv4_header_decode #(
                     destination_address <= {destination_address[31:16], s_axis_tdata[7:0], s_axis_tdata[15:8]};
                 default: begin end
                 endcase
-
-                if (last_dword) begin
-                    header_valid <= !invalid && &checksum_check_next; // Not packet invalid and checksum next == FFFFFFFF
-                end
             end
         endcase
     end
@@ -114,6 +122,7 @@ module ipv4_header_decode #(
     always_comb begin
         s_axis_tready = state == X_READ;
         decode_done = state == X_RESET;
+        header_valid = decode_done & !invalid & &checksum_check_int;
         s_axis_tlast  = last_dword;
     end
 
