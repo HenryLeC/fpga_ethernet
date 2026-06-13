@@ -44,7 +44,7 @@ module ipv4_header_encode #(
     endcase
 
     always_comb begin
-        m_axis_tvalid = current_state | check_valid;
+        m_axis_tvalid = current_state | (data_valid & check_valid);
         m_axis_tlast = dword_count == 5;
         if (!current_state & !data_valid)
             m_axis_tdata = 32'h0;
