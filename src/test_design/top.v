@@ -196,6 +196,7 @@ module top (
 
     pcs_tx tx_pcs_inst (
         .clk(tx_clk),
+        .arst(rst_txsync),
         
         .TXD(TXD),
         .TXC(TXC),
