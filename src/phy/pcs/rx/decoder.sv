@@ -65,37 +65,37 @@ module decoder #() (
                 end
             BT_T1:
                 begin
-                    xgmii_rx_data = {{6{RS_IDLE}}, RS_TERM, rx_data[7:0]};
+                    xgmii_rx_data = {{6{RS_IDLE}}, RS_TERM, rx_data[15:8]};
                     xgmii_rx_control = 8'hFE;
                 end
             BT_T2:
                 begin
-                    xgmii_rx_data = {{5{RS_IDLE}}, RS_TERM, rx_data[15:0]};
+                    xgmii_rx_data = {{5{RS_IDLE}}, RS_TERM, rx_data[23:8]};
                     xgmii_rx_control = 8'hFC;
                 end
             BT_T3:
                 begin
-                    xgmii_rx_data = {{4{RS_IDLE}}, RS_TERM, rx_data[23:0]};
+                    xgmii_rx_data = {{4{RS_IDLE}}, RS_TERM, rx_data[31:8]};
                     xgmii_rx_control = 8'hF8;
                 end
             BT_T4:
                 begin
-                    xgmii_rx_data = {{3{RS_IDLE}}, RS_TERM, rx_data[31:0]};
+                    xgmii_rx_data = {{3{RS_IDLE}}, RS_TERM, rx_data[39:8]};
                     xgmii_rx_control = 8'hF0;
                 end
             BT_T5:
                 begin
-                    xgmii_rx_data = {{2{RS_IDLE}}, RS_TERM, rx_data[39:0]};
+                    xgmii_rx_data = {{2{RS_IDLE}}, RS_TERM, rx_data[47:8]};
                     xgmii_rx_control = 8'hE0;
                 end
             BT_T6:
                 begin
-                    xgmii_rx_data = {RS_IDLE, RS_TERM, rx_data[47:0]};
+                    xgmii_rx_data = {RS_IDLE, RS_TERM, rx_data[55:8]};
                     xgmii_rx_control = 8'hC0;
                 end
             BT_T7:
                 begin
-                    xgmii_rx_data = {RS_TERM, rx_data[55:0]};
+                    xgmii_rx_data = {RS_TERM, rx_data[63:8]};
                     xgmii_rx_control = 8'h80;
                 end
             default:
