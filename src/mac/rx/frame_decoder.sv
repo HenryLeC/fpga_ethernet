@@ -38,11 +38,33 @@ module frame_decoder #(
     wire [31:0] crc;
     reg crc_check;
 
+    reg [31:0] recv_crc;
+
+    always_ff @(posedge i_clk or posedge i_arst)
+    if (i_arst)
+        recv_crc <= 0;
+    else if (end_detected)
+        case (~i_RXC)
+            4'b0001: recv_crc <= {i_RXD[7:0], prev_RXD[31:8]};
+            4'b0011: recv_crc <= {i_RXD[15:0], prev_RXD[31:16]};
+            4'b0111: recv_crc <= {i_RXD[24:0], prev_RXD[31:25]};
+            4'b0000: recv_crc <= {prev_RXD};
+            default: begin end
+        endcase
+
+    logic [31:0] prev_RXD;
+    logic [ 1:0] prev_state;
+    always_ff @(posedge i_clk) begin
+        prev_RXD <= i_RXD;
+        prev_state <= state;
+    end
+
     crc_calc crc_calc_inst (
         .i_clk(i_clk),
-        .i_arst(state == X_START),
-        .i_data(i_RXD),
-        .i_valid(~i_RXC),
+        .i_arst(prev_state == X_START),
+        .i_data(prev_RXD),
+        .i_keep(~i_RXC),
+        .i_valid(),
         .o_crc(crc)
     );
 
@@ -67,11 +89,7 @@ module frame_decoder #(
     else
         proc_count <= (state == next_state) ? proc_count + 1 : 0;
 
-    always_ff @(posedge i_clk or posedge i_arst)
-    if (i_arst)
-        crc_check <= 0;
-    else
-        crc_check <= crc == i_RXD;
+    assign crc_check = crc == recv_crc;
 
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)

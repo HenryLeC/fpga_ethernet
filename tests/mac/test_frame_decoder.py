@@ -107,4 +107,5 @@ async def test_frame_decoder(dut):
         await RisingEdge(dut.i_clk)
 
     assert dut.m_axis_tlast.value
+    await RisingEdge(dut.i_clk)
     assert not dut.m_axis_tinvalid.value

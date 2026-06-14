@@ -2,7 +2,8 @@ module crc_calc(
     input  wire        i_clk,
     input  wire        i_arst,
     input  wire [31:0] i_data,
-    input  wire [3:0]  i_valid,
+    input  wire [ 3:0] i_keep,
+    input  wire        i_valid,
     output wire [31:0] o_crc
 );
 
@@ -35,7 +36,13 @@ module crc_calc(
 
     always_comb begin
         field_one = i_data ^ current_crc;
-        crc_next = lookup_3[field_one[7:0]] ^ lookup_2[field_one[15:8]] ^ lookup_1[field_one[23:16]] ^ lookup_0[field_one[31:24]];
+        case (i_keep)
+        4'b0001: crc_next = (current_crc >> 8 ) ^ lookup_0[field_one[7:0]];
+        4'b0011: crc_next = (current_crc >> 16) ^ lookup_1[field_one[7:0]] ^ lookup_0[field_one[15:8]];
+        4'b0111: crc_next = (current_crc >> 24) ^ lookup_2[field_one[7:0]] ^ lookup_1[field_one[15:8]] ^ lookup_0[field_one[23:16]];
+        4'b1111: crc_next = lookup_3[field_one[7:0]] ^ lookup_2[field_one[15:8]] ^ lookup_1[field_one[23:16]] ^ lookup_0[field_one[31:24]];
+        default: crc_next = current_crc;
+        endcase
     end
 
     assign o_crc = ~current_crc;

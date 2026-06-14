@@ -18,7 +18,8 @@ module frame_encoder (
         .i_clk(i_clk),
         .i_arst(current_state == X_START),
         .i_data(TXD),
-        .i_valid(current_state == X_ADDRESS ? 4'hF : current_state == X_USER_DATA ? i_clientdata_valid : current_state == X_PAD ? 4'hF : 4'h0),
+        .i_keep(current_state == X_ADDRESS ? 4'hF : current_state == X_USER_DATA ? i_clientdata_valid : current_state == X_PAD ? 4'hF : 4'h0),
+        .i_valid(),
         .o_crc(crc)
     );
 

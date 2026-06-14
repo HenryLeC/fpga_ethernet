@@ -82,7 +82,8 @@ async def test_crc_calc(dut):
 
     for word in packet:
         dut.i_data.value = word
-        dut.i_valid.value = 0xF
+        dut.i_valid.value = 1
+        dut.i_keep.value = 0xF
 
         await RisingEdge(dut.i_clk)
     await FallingEdge(dut.i_clk)
