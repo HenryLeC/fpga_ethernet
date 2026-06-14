@@ -20,6 +20,24 @@ module ipv4_udp_packet_generator (
     wire udp_axis_tvalid, udp_axis_tready, udp_axis_tlast;
     wire [31:0] udp_axis_tdata;
 
+    wire out_axis_tvalid, out_axis_tlast, out_axis_tready;
+    wire [31:0] out_axis_tdata;
+
+    axis_out_buffer out_buffer_inst (
+        .i_clk(i_clk),
+        .i_arst(i_arst),
+        
+        .s_axis_tdata(out_axis_tdata),
+        .s_axis_tvalid(out_axis_tvalid),
+        .s_axis_tready(out_axis_tready),
+        .s_axis_tlast(out_axis_tlast),
+
+        .m_axis_tdata(m_axis_tdata),
+        .m_axis_tvalid(m_axis_tvalid),
+        .m_axis_tready(m_axis_tready),
+        .m_axis_tlast(m_axis_tlast)
+    );
+
     ipv4_header_prepend header_prepend_inst (
         .i_clk(i_clk),
         .i_arst(i_arst),
@@ -34,10 +52,10 @@ module ipv4_udp_packet_generator (
         .data_axis_tready(udp_axis_tready),
         .data_axis_tlast(udp_axis_tlast),
 
-        .m_axis_tvalid(m_axis_tvalid),
-        .m_axis_tdata(m_axis_tdata),
-        .m_axis_tready(m_axis_tready),
-        .m_axis_tlast(m_axis_tlast)
+        .m_axis_tvalid(out_axis_tvalid),
+        .m_axis_tdata(out_axis_tdata),
+        .m_axis_tready(out_axis_tready),
+        .m_axis_tlast(out_axis_tlast)
     );
 
     ipv4_header_encode header_gen_inst (

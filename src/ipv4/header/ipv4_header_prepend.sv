@@ -56,13 +56,13 @@ module ipv4_header_prepend #(
         end
         X_HEAD: begin
             m_axis_tdata = header_axis_tlast ? {data_axis_tdata[15:0], header_axis_tdata[15:0]} : header_axis_tdata;
-            header_axis_tready = 1;
+            header_axis_tready = m_axis_tready;
             data_axis_tready   = header_axis_tlast ? 1 : 0;
         end
         X_BODY: begin
             m_axis_tdata = {data_axis_tdata[15:0], data_upper_bytes};
             header_axis_tready = 0;
-            data_axis_tready   = 1;
+            data_axis_tready   = m_axis_tready;
         end
         default: begin
             m_axis_tdata = 0;

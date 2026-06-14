@@ -6,6 +6,7 @@ src/i2c/cycle_timer.sv
 src/include/code_defs.svh
 
 src/helpers/async_fifo.sv
+src/helpers/axis_out_buffer.sv
 src/helpers/sync_fifo.sv
 src/helpers/ones_complement_adder.sv
 
