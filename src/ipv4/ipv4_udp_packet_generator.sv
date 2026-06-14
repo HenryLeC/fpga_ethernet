@@ -3,13 +3,14 @@ module ipv4_udp_packet_generator (
     input wire i_arst,
 
     input  wire  [31:0] s_axis_tdata,
+    input  wire  [ 3:0] s_axis_tkeep,
     input  wire         s_axis_tvalid,
     output logic        s_axis_tready,
     input  wire         s_axis_tlast,
     input  wire  [15:0] s_axis_tlen,
 
-    output logic        m_axis_tvalid,
     output logic [31:0] m_axis_tdata,
+    output logic        m_axis_tvalid,
     input  wire         m_axis_tready,
     output logic        m_axis_tlast
 );

@@ -11,6 +11,7 @@ module udp_packet_decode #(
     input  wire         s_axis_tlast,
 
     output logic [31:0] m_axis_tdata,
+    output logic [ 3:0] m_axis_tkeep,
     output logic        m_axis_tvalid, // TValid being asserted also means sideband is valid
     input  wire         m_axis_tready, // Unconnected (can add buffer for backpressure support)
     output logic        m_axis_tlast,
@@ -74,15 +75,26 @@ module udp_packet_decode #(
     end
     endcase
 
+    wire [15:0] words_left = full_length - dword_counter;
+
     always_comb
     case (current_state)
     X_DATA: begin
         m_axis_tdata = s_axis_tdata;
         m_axis_tvalid = 1;
-        m_axis_tlast = dword_counter + 4 >= full_length;
+        case (words_left)
+        4: m_axis_tkeep = 4'b1111;
+        3: m_axis_tkeep = 4'b0111;
+        2: m_axis_tkeep = 4'b0011;
+        1: m_axis_tkeep = 4'b0001;
+        0: m_axis_tkeep = 4'b0000;
+        default: m_axis_tkeep = 4'b1111;
+        endcase
+        m_axis_tlast = 4 >= words_left;
     end
     default: begin
         m_axis_tdata = 0;
+        m_axis_tkeep = 0;
         m_axis_tvalid = 0;
         m_axis_tlast = 0;
     end

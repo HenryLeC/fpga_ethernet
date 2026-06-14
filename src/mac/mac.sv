@@ -66,6 +66,7 @@ module mac (
 
     wire [31:0] recv_tdata;
     wire [15:0] recv_tlen;
+    wire [ 3:0] recv_tkeep;
     wire        recv_tvalid, recv_tready, recv_tlast;
 
     ipv4_udp_packet_decoder decoder_inst (
@@ -78,6 +79,7 @@ module mac (
         .s_axis_tlast(r_frame_tlast),
 
         .m_axis_tdata(recv_tdata),
+        .m_axis_tkeep(recv_tkeep),
         .m_axis_tvalid(recv_tvalid),
         .m_axis_tready(recv_tready),
         .m_axis_tlast(recv_tlast),
@@ -85,23 +87,24 @@ module mac (
     );
 
     sync_fifo #(
-        .DATA_WIDTH(32+16+1),
+        .DATA_WIDTH(32+16+4+1),
         .ADDRESS_WIDTH(5)
     ) fifo_buffer (
         .i_clk(i_txclk),
         .i_arst(i_arst | vio_reset),
 
-        .s_tdata({recv_tlen, recv_tlast, recv_tdata}),
+        .s_tdata({recv_tlen, recv_tlast, recv_tkeep, recv_tdata}),
         .s_tvalid(recv_tvalid),
         .s_tready(recv_tready),
 
-        .m_tdata({udp_data_tlength, udp_data_tlast, udp_data_tdata}),
+        .m_tdata({udp_data_tlength, udp_data_tlast, udp_data_tkeep, udp_data_tdata}),
         .m_tvalid(udp_data_tvalid),
         .m_tready(udp_data_tready)
     );
 
     wire [31:0] udp_data_tdata;
     wire [15:0] udp_data_tlength;
+    wire [ 3:0] udp_data_tkeep;
     wire udp_data_tready, udp_data_tvalid, udp_data_tlast;
 
     ipv4_udp_packet_generator packet_generator (
@@ -114,6 +117,7 @@ module mac (
         .m_axis_tlast(last),
 
         .s_axis_tdata(udp_data_tdata),
+        .s_axis_tkeep(udp_data_tkeep),
         .s_axis_tvalid(udp_data_tvalid),
         .s_axis_tready(udp_data_tready),
         .s_axis_tlast(udp_data_tlast),

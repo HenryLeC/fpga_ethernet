@@ -8,6 +8,7 @@ module ipv4_udp_packet_decoder (
     input  wire         s_axis_tlast,
 
     output logic [31:0] m_axis_tdata,
+    output logic [ 3:0] m_axis_tkeep,
     output logic        m_axis_tvalid,
     input  wire         m_axis_tready,
     output logic        m_axis_tlast,
@@ -92,6 +93,7 @@ module ipv4_udp_packet_decoder (
         .s_axis_tlast(data_tlast),
 
         .m_axis_tdata(m_axis_tdata),
+        .m_axis_tkeep(m_axis_tkeep),
         .m_axis_tvalid(packet_valid),
         .m_axis_tready(m_axis_tready),
         .m_axis_tlast(m_axis_tlast),
