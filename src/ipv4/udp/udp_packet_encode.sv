@@ -67,6 +67,7 @@ module udp_packet_encode #(
         end
         default: begin
             m_axis_tdata = 0;
+            m_axis_tkeep = 0;
             s_axis_tready = 0;
         end
         endcase
