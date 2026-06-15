@@ -7,7 +7,7 @@ Low latency soft MAC and PHY for 10Gb ethernet with future plans for 25Gb suppor
 - [x] IPV4 Header Generation
 - [x] IPV4 Header Decoding
 - [x] IPV4 Header CRC
-- [ ] UDP packet generation and decoding
+- [x] UDP packet generation and decoding
 - [ ] TCP Support
 
 ## Documentation
