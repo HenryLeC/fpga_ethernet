@@ -45,15 +45,24 @@ async def generate_clock(dut):
 @cocotb.test()
 async def test_ipv4_loopback(dut):
 
-    data = [0x48454C4C, 0x4F20574F, 0x524C4421]
+    data = [
+        0x4C,
+        0x4C,
+        0x45,
+        0x48,
+        0x4F,
+        0x57,
+        0x20,
+        0x4F,
+        0x21,
+        0x44,
+        0x4C,
+        0x52,
+    ]
 
-    source = AxiStreamSource(
-        AxiStreamBus(dut, "s_axis"), dut.i_clk, dut.i_arst, byte_lanes=1
-    )
+    source = AxiStreamSource(AxiStreamBus(dut, "s_axis"), dut.i_clk, dut.i_arst)
 
-    sink = AxiStreamSink(
-        AxiStreamBus(dut, "m_axis"), dut.i_clk, dut.i_arst, byte_lanes=1
-    )
+    sink = AxiStreamSink(AxiStreamBus(dut, "m_axis"), dut.i_clk, dut.i_arst)
 
     cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
 

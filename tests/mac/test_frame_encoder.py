@@ -103,7 +103,8 @@ async def test_frame_encoder(dut):
 
     i = 0
     dut.i_clientdata.value = packet[i]
-    dut.i_clientdata_valid.value = 0xF
+    dut.i_clientdata_valid.value = 1
+    dut.i_clientdata_keep.value = 0xF
 
     await RisingEdge(dut.i_clk)
 
@@ -114,7 +115,8 @@ async def test_frame_encoder(dut):
         if dut.o_ready.value:
             i += 1
             dut.i_clientdata.value = packet[i]
-            dut.i_clientdata_valid.value = 0xF
+            dut.i_clientdata_valid.value = 1
+            dut.i_clientdata_keep.value = 0xF
             dut.i_last.value = i == len(packet) - 1
         await RisingEdge(dut.i_clk)
         cnt += 1

@@ -11,7 +11,7 @@ module dummy_frame_encoder #(
     wire ready, last;
 
     wire [31:0] data;
-    wire [3:0]  valid;
+    wire [3:0]  keep;
 
     dummy_frame #(
         .COUNT_BITS(COUNT_BITS)
@@ -21,7 +21,7 @@ module dummy_frame_encoder #(
         
         .i_ready(ready),
         .o_data(data),
-        .o_valid(valid),
+        .o_valid(keep),
         .o_last(last)
     );
 
@@ -30,7 +30,8 @@ module dummy_frame_encoder #(
         .i_arst(i_arst),
 
         .i_clientdata(data),
-        .i_clientdata_valid(valid),
+        .i_clientdata_valid(|keep),
+        .i_clientdata_keep(keep),
         .i_last(last),
         .o_ready(ready),
 

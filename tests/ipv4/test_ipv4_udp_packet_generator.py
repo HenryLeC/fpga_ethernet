@@ -45,11 +45,22 @@ async def generate_clock(dut):
 @cocotb.test()
 async def test_ipv4_udp_packet_generator(dut):
 
-    data = [0x48454C4C, 0x4F20574F, 0x524C4421]
+    data = [
+        0x4C,
+        0x4C,
+        0x45,
+        0x48,
+        0x4F,
+        0x57,
+        0x20,
+        0x4F,
+        0x21,
+        0x44,
+        0x4C,
+        0x52,
+    ]
 
-    source = AxiStreamSource(
-        AxiStreamBus(dut, "s_axis"), dut.i_clk, dut.i_arst, byte_lanes=1
-    )
+    source = AxiStreamSource(AxiStreamBus(dut, "s_axis"), dut.i_clk, dut.i_arst)
 
     cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
 
@@ -68,9 +79,7 @@ async def test_ipv4_udp_packet_generator(dut):
     for i in range(10):
         await RisingEdge(dut.i_clk)
 
-    sink = AxiStreamSink(
-        AxiStreamBus(dut, "m_axis"), dut.i_clk, dut.i_arst, byte_lanes=1
-    )
+    sink = AxiStreamSink(AxiStreamBus(dut, "m_axis"), dut.i_clk, dut.i_arst)
     data = await sink.read()
 
     correct_frame = [
@@ -87,8 +96,14 @@ async def test_ipv4_udp_packet_generator(dut):
         0x0000524C,
     ]
 
-    for idx, frame in enumerate(correct_frame):
-        if idx == len(correct_frame) - 1:
-            assert data[idx] & 0xFFFF == frame
-        else:
-            assert data[idx] == frame
+    correct_bytes = []
+    for dword in correct_frame:
+        correct_bytes += [
+            dword & 0xFF,
+            (dword >> 8) & 0xFF,
+            (dword >> 16) & 0xFF,
+            (dword >> 24) & 0xFF,
+        ]
+
+    for recv, correct in zip(data, correct_bytes):
+        assert recv == correct

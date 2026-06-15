@@ -44,13 +44,27 @@ async def generate_clock(dut):
 
 @cocotb.test()
 async def test_udp_packet_encode(dut):
-
-    data = [0x48454C4C, 0x4F20574F, 0x524C4421]
-
-    source = AxiStreamSource(
-        AxiStreamBus(dut, "s_axis"), dut.i_clk, dut.i_arst, byte_lanes=1
-    )
     cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
+
+    data = [
+        0x4C,
+        0x4C,
+        0x45,
+        0x48,
+        0x4F,
+        0x57,
+        0x20,
+        0x4F,
+        0x21,
+        0x44,
+        0x4C,
+        0x52,
+    ]
+    source = AxiStreamSource(
+        AxiStreamBus(dut, "s_axis"),
+        dut.i_clk,
+        dut.i_arst,
+    )
 
     dut.i_arst.value = 1
 
@@ -65,13 +79,13 @@ async def test_udp_packet_encode(dut):
 
     frame = AxiStreamFrame(tdata=data, tx_complete=Event())
     dut.m_axis_tready.value = 1
-
+    source.clear()
     cocotb.start_soon(source.send(frame))
 
     await RisingEdge(dut.m_axis_tvalid)
     await FallingEdge(dut.i_clk)
 
-    packet = [0x901FD204, 0x00001400] + data
+    packet = [0x901FD204, 0x00001400] + [0x48454C4C, 0x4F20574F, 0x524C4421]
 
     for idx, dword in enumerate(packet):
         assert dut.m_axis_tdata.value == dword
