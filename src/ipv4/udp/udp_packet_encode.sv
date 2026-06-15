@@ -6,11 +6,13 @@ module udp_packet_encode #(
     input  wire i_arst,
 
     input  wire  [31:0] s_axis_tdata,
+    input  wire  [ 3:0] s_axis_tkeep,
     input  wire         s_axis_tvalid, // TValid being asserted also means sideband is valid
     output logic        s_axis_tready,
     input  wire         s_axis_tlast,
 
     output logic [31:0] m_axis_tdata,
+    output logic [ 3:0] m_axis_tkeep,
     output logic        m_axis_tvalid,
     input  wire         m_axis_tready,
     output logic        m_axis_tlast,
@@ -50,14 +52,17 @@ module udp_packet_encode #(
         case (current_state)
         X_IDLE: begin
             m_axis_tdata = {destination_port[7:0], destination_port[15:8], source_port[7:0], source_port[15:8]};
+            m_axis_tkeep = 4'hf;
             s_axis_tready = 0;
         end
         X_HEAD: begin
             m_axis_tdata = {16'd0, full_length[7:0], full_length[15:8]};
+            m_axis_tkeep = 4'hf;
             s_axis_tready = 0;
         end
         X_DATA: begin
             m_axis_tdata = s_axis_tdata;
+            m_axis_tkeep = s_axis_tkeep;
             s_axis_tready = 1;
         end
         default: begin

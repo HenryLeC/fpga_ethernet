@@ -1,4 +1,4 @@
-module crc_calc(
+module crc_calc (
     input  wire        i_clk,
     input  wire        i_arst,
     input  wire [31:0] i_data,
@@ -46,4 +46,5 @@ module crc_calc(
     end
 
     assign o_crc = ~current_crc;
+
 endmodule

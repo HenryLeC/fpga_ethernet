@@ -10,12 +10,14 @@ module ipv4_header_prepend #(
     input  wire         header_axis_tlast,
 
     input  wire  [31:0] data_axis_tdata,
+    input  wire  [ 3:0] data_axis_tkeep,
     input  wire         data_axis_tvalid,
     output logic        data_axis_tready,
     input  wire         data_axis_tlast,
 
-    output logic        m_axis_tvalid,
     output logic [31:0] m_axis_tdata,
+    output logic [ 3:0] m_axis_tkeep,
+    output logic        m_axis_tvalid,
     input  wire         m_axis_tready,
     output logic        m_axis_tlast
 
@@ -51,21 +53,25 @@ module ipv4_header_prepend #(
         case (current_state)
         X_IDLE: begin
             m_axis_tdata = header_axis_tvalid ? header_axis_tdata : 0;
+            m_axis_tkeep = 4'hf;
             header_axis_tready = header_axis_tvalid & m_axis_tready ? 1 : 0;
             data_axis_tready   = 0;
         end
         X_HEAD: begin
             m_axis_tdata = header_axis_tlast ? {data_axis_tdata[15:0], header_axis_tdata[15:0]} : header_axis_tdata;
+            m_axis_tkeep = 4'hf;
             header_axis_tready = m_axis_tready;
             data_axis_tready   = header_axis_tlast ? 1 : 0;
         end
         X_BODY: begin
             m_axis_tdata = {data_axis_tdata[15:0], data_upper_bytes};
+            m_axis_tkeep = {data_axis_tvalid ? data_axis_tkeep[1:0] : 2'b0, data_upper_keep};
             header_axis_tready = 0;
             data_axis_tready   = m_axis_tready;
         end
         default: begin
             m_axis_tdata = 0;
+            m_axis_tkeep = 0;
             header_axis_tready = 0;
             data_axis_tready   = 0;
         end
@@ -73,9 +79,10 @@ module ipv4_header_prepend #(
     end
 
     logic [15:0] data_upper_bytes = 0;
+    logic [1:0] data_upper_keep = 0;
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
-        data_upper_bytes <= 0;
+        {data_upper_bytes, data_upper_keep} <= 0;
     else if (data_axis_tready)
-        data_upper_bytes <= data_axis_tdata[31:16];
+        {data_upper_bytes, data_upper_keep} <= {data_axis_tdata[31:16], data_axis_tkeep[3:2]};
 endmodule

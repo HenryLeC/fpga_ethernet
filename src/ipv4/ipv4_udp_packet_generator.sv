@@ -10,6 +10,7 @@ module ipv4_udp_packet_generator (
     input  wire  [15:0] s_axis_tlen,
 
     output logic [31:0] m_axis_tdata,
+    output logic [ 3:0] m_axis_tkeep,
     output logic        m_axis_tvalid,
     input  wire         m_axis_tready,
     output logic        m_axis_tlast
@@ -20,20 +21,24 @@ module ipv4_udp_packet_generator (
 
     wire udp_axis_tvalid, udp_axis_tready, udp_axis_tlast;
     wire [31:0] udp_axis_tdata;
+    wire [ 3:0] udp_axis_tkeep;
 
     wire out_axis_tvalid, out_axis_tlast, out_axis_tready;
     wire [31:0] out_axis_tdata;
+    wire [ 3:0] out_axis_tkeep;
 
     axis_out_buffer out_buffer_inst (
         .i_clk(i_clk),
         .i_arst(i_arst),
         
         .s_axis_tdata(out_axis_tdata),
+        .s_axis_tkeep(out_axis_tkeep),
         .s_axis_tvalid(out_axis_tvalid),
         .s_axis_tready(out_axis_tready),
         .s_axis_tlast(out_axis_tlast),
 
         .m_axis_tdata(m_axis_tdata),
+        .m_axis_tkeep(m_axis_tkeep),
         .m_axis_tvalid(m_axis_tvalid),
         .m_axis_tready(m_axis_tready),
         .m_axis_tlast(m_axis_tlast)
@@ -49,12 +54,14 @@ module ipv4_udp_packet_generator (
         .header_axis_tlast(header_tlast),
 
         .data_axis_tdata(udp_axis_tdata),
+        .data_axis_tkeep(udp_axis_tkeep),
         .data_axis_tvalid(udp_axis_tvalid),
         .data_axis_tready(udp_axis_tready),
         .data_axis_tlast(udp_axis_tlast),
 
-        .m_axis_tvalid(out_axis_tvalid),
         .m_axis_tdata(out_axis_tdata),
+        .m_axis_tkeep(out_axis_tkeep),
+        .m_axis_tvalid(out_axis_tvalid),
         .m_axis_tready(out_axis_tready),
         .m_axis_tlast(out_axis_tlast)
     );
@@ -81,11 +88,13 @@ module ipv4_udp_packet_generator (
         .i_arst(i_arst),
 
         .s_axis_tdata(s_axis_tdata),
+        .s_axis_tkeep(s_axis_tkeep),
         .s_axis_tvalid(s_axis_tvalid),
         .s_axis_tready(s_axis_tready),
         .s_axis_tlast(s_axis_tlast),
 
         .m_axis_tdata(udp_axis_tdata),
+        .m_axis_tkeep(udp_axis_tkeep),
         .m_axis_tvalid(udp_axis_tvalid),
         .m_axis_tready(udp_axis_tready),
         .m_axis_tlast(udp_axis_tlast),

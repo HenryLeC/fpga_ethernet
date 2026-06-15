@@ -4,92 +4,162 @@ module frame_encoder (
     input  wire i_arst,
 
     input  wire [31:0] i_clientdata,
-    input  wire [3:0]  i_clientdata_valid,
+    input  wire [ 3:0] i_clientdata_keep,
+    input  wire        i_clientdata_valid,
     input  wire        i_last,
-    output reg         o_ready,
+    output wire         o_ready,
 
-    output reg [3:0]  TXC,
-    output reg [31:0] TXD
+    output logic [3:0]  TXC,
+    output logic [31:0] TXD
 );
 
-    wire [31:0] crc;
+    wire [31:0] xgmii_data;
+    wire [ 3:0] xgmii_control;
+    wire [ 3:0] xgmii_keep;
 
-    crc_calc crc_calc_inst (
+    wire [31:0] xgmii_data_shifted;
+    wire [ 3:0] xgmii_control_shifted;
+    wire [ 3:0] xgmii_keep_shifted;
+
+    frame_builder frame_builder_inst (
         .i_clk(i_clk),
-        .i_arst(current_state == X_START),
-        .i_data(TXD),
-        .i_keep(current_state == X_ADDRESS ? 4'hF : current_state == X_USER_DATA ? i_clientdata_valid : current_state == X_PAD ? 4'hF : 4'h0),
-        .i_valid(),
-        .o_crc(crc)
+        .i_arst(i_arst),
+
+        .i_clientdata(i_clientdata),
+        .i_clientdata_keep(i_clientdata_keep),
+        .i_clientdata_valid(i_clientdata_valid),
+        .i_last(i_last),
+        .o_ready(o_ready),
+
+        .xgmii_data(xgmii_data),
+        .xgmii_control(xgmii_control),
+        .xgmii_keep(xgmii_keep)
     );
 
-    reg [1:0]  proc_count;
-    reg [2:0]  current_state, next_state;
+    double_word_packer #(
+        .BYTE_LANES(4),
+        .BYTE_WIDTH(8)
+    ) data_packer (
+        .word_low(xgmii_next_data[0]),
+        .word_high(xgmii_next_data[1]),
+        .shift_count(shift_count),
+        
+        .word_pack(TXD)
+    );
+    
+    double_word_packer #(
+        .BYTE_LANES(4),
+        .BYTE_WIDTH(1)
+    ) control_packer (
+        .word_low(xgmii_next_control[0]),
+        .word_high(xgmii_next_control[1]),
+        .shift_count(shift_count),
+        
+        .word_pack(TXC)
+    );
 
-    reg [10:0] word_count = 0;
+    shift_out_used #(
+        .BYTE_LANES(4),
+        .BYTE_WIDTH(8),
+        .UPPER_BYTES(8'h07)
+    ) data_shift_out (
+        .word(xgmii_next_data[1]),
+        .shift_count(shift_count),
 
-    localparam X_IDLE          = 3'd0;
-    localparam X_START         = 3'd1;
-    localparam X_ADDRESS       = 3'd2;
-    localparam X_USER_DATA     = 3'd3;
-    localparam X_PAD           = 3'd4;
-    localparam X_FCS           = 3'd5;
-    localparam X_END           = 3'd6;
-    localparam X_IFG           = 3'd7;
+        .out(xgmii_data_shifted)
+    );
+    
+    shift_out_used #(
+        .BYTE_LANES(4),
+        .BYTE_WIDTH(1),
+        .UPPER_BYTES(1'd1)
+    ) control_shift_out (
+        .word(xgmii_next_control[1]),
+        .shift_count(shift_count),
 
+        .out(xgmii_control_shifted)
+    );
+    
+    shift_out_used #(
+        .BYTE_LANES(4),
+        .BYTE_WIDTH(1),
+        .UPPER_BYTES(1'd0)
+    ) keep_shift_out (
+        .word(xgmii_next_keep[1]),
+        .shift_count(shift_count),
 
-    initial current_state = X_IDLE;
-    initial proc_count = 0;
-    always_ff @(posedge i_clk or posedge i_arst)
-        if (i_arst) begin
-            current_state <= X_IDLE;
-            proc_count <= 0;
-        end else begin
-            current_state <= next_state;
-            proc_count <= current_state != next_state ? 0 : proc_count + 1;
-        end
+        .out(xgmii_keep_shifted)
+    );
 
-    initial word_count = 0;
+    logic [1:0] shift_count;
+
     always_ff @(posedge i_clk)
-    if (current_state == X_IDLE)
-        word_count <= 0;
-    else if (current_state == X_USER_DATA | current_state == X_PAD)
-        word_count <= word_count + 1;
-
-    // Next state computation
-    always_comb
-    case (current_state)
-        X_IDLE:      next_state = i_clientdata_valid == 0 ? X_IDLE : X_START;
-        X_START:     next_state = proc_count == 1 ? X_ADDRESS : X_START;
-        X_ADDRESS:   next_state = proc_count == 2 ? X_USER_DATA : X_ADDRESS;
-        X_USER_DATA: next_state = i_last ? word_count >= 11 ? X_FCS : X_PAD : X_USER_DATA;
-        X_PAD:       next_state = word_count == 11 ? X_FCS : X_PAD;
-        X_FCS:       next_state = X_END;
-        X_END:       next_state = X_IFG;
-        X_IFG:       next_state = proc_count == 2 ? X_IDLE : X_IFG;
-        default:     next_state = X_IDLE;
+    case (xgmii_keep_shifted)
+    4'b0111: shift_count <= shift_count > 1 ? shift_count : 1;
+    4'b0011: shift_count <= shift_count > 2 ? shift_count : 2;
+    4'b0001: shift_count <= 3;
+    default: shift_count <= 0;
     endcase
 
-    always_comb
-    case (current_state)
-        X_IDLE:      {TXC, TXD} = {4'hF, {4{8'h07}}};
-        X_START:     {TXC, TXD} = proc_count[0] ? {4'h0, 32'hD5555555} : {4'h1, 32'h555555FB};
-        X_ADDRESS:
-        case (proc_count)
-            0: {TXC, TXD} = {4'h0, 32'hFFFFFFFF};
-            1: {TXC, TXD} = {4'h0, 32'h01C0FFFF};
-            2: {TXC, TXD} = {4'h0, 32'hCB35F222};
-            default: {TXC, TXD} = 36'd0;
-        endcase
-        X_USER_DATA: {TXC, TXD} = {4'h0, i_clientdata};
-        X_PAD:       {TXC, TXD} = {4'h0, 32'h0};
-        X_FCS:       {TXC, TXD} = {4'h0, crc};
-        X_END:       {TXC, TXD} = {4'hF, 32'h070707FD};
-        X_IFG:       {TXC, TXD} = {4'hF, {4{8'h07}}};
-        default:     {TXC, TXD} = {4'hF, {4{8'h07}}};
-    endcase
+
+    logic [31:0] xgmii_next_data [0:1];
+    logic [ 3:0] xgmii_next_control [0:1];
+    logic [ 3:0] xgmii_next_keep [0:1];
+
+    logic       control [0:3];
+    
 
     always_ff @(posedge i_clk) begin
-        o_ready <= next_state == X_USER_DATA;
+        xgmii_next_data[0] <= xgmii_data_shifted;
+        xgmii_next_control[0] <= xgmii_control_shifted;
+        xgmii_next_keep[0] <= xgmii_keep_shifted;
     end
+    always_comb begin
+        xgmii_next_data[1] = xgmii_data;
+        xgmii_next_control[1] = xgmii_control;
+        xgmii_next_keep[1] = xgmii_keep;
+    end
+endmodule
+
+module double_word_packer #(
+    parameter BYTE_LANES = 4,
+    parameter BYTE_WIDTH = 8
+) (
+    input wire [BYTE_LANES * BYTE_WIDTH - 1:0] word_low,
+    input wire [BYTE_LANES * BYTE_WIDTH - 1:0] word_high,
+    input wire [$clog2(BYTE_LANES)-1:0] shift_count,
+
+    output logic [BYTE_LANES * BYTE_WIDTH - 1:0] word_pack
+);
+
+    wire [$clog2(BYTE_LANES):0] BYTE_LANES_short = BYTE_LANES[$clog2(BYTE_LANES):0];
+
+    wire [BYTE_LANES * BYTE_WIDTH - 1:0] low_mask, high_mask;
+
+    assign low_mask  = {(BYTE_LANES * BYTE_WIDTH){1'b1}} >> (shift_count * BYTE_WIDTH);
+    assign high_mask = ~low_mask;
+
+    assign word_pack = (word_low & low_mask) | (word_high << ((BYTE_LANES_short - {2'd0, shift_count}) * BYTE_WIDTH));
+
+endmodule
+
+module shift_out_used #(
+    parameter BYTE_LANES = 4,
+    parameter BYTE_WIDTH = 8,
+    parameter [BYTE_WIDTH-1:0] UPPER_BYTES = 0
+) (
+    input wire [BYTE_LANES * BYTE_WIDTH -1:0] word,
+    input wire [$clog2(BYTE_LANES)-1:0] shift_count,
+
+    output logic [BYTE_LANES * BYTE_WIDTH -1:0] out
+);
+    wire [$clog2(BYTE_LANES):0] BYTE_LANES_short = BYTE_LANES[$clog2(BYTE_LANES):0];
+    
+    wire [BYTE_LANES * BYTE_WIDTH -1:0] top, low_mask, high_mask;
+
+    
+    assign top  = {BYTE_LANES{UPPER_BYTES}} << ((BYTE_LANES_short - {2'd0, shift_count}) * BYTE_WIDTH);
+    
+    assign out = top | (word >> (shift_count * BYTE_WIDTH));
+
 endmodule

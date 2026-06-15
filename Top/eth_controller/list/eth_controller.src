@@ -23,6 +23,7 @@ src/mac/rx/frame_decoder.sv
 
 src/mac/tx/dummy_frame_encoder.sv
 src/mac/tx/dummy_frame.sv
+src/mac/tx/frame_builder.sv
 src/mac/tx/frame_encoder.sv
 
 src/ipv4/header/checksum_calc.sv

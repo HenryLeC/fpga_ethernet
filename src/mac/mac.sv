@@ -112,6 +112,7 @@ module mac (
         .i_arst(i_arst | vio_reset),
         
         .m_axis_tvalid(valid),
+        .m_axis_tkeep(keep),
         .m_axis_tdata(data),
         .m_axis_tready(ready),
         .m_axis_tlast(last),
@@ -126,6 +127,7 @@ module mac (
 
     wire valid, last, ready;
     wire [31:0] data;
+    wire [ 3:0] keep;
 
     wire [31:0] TXD;
     wire [ 3:0] TXC;
@@ -135,7 +137,8 @@ module mac (
         .i_arst(i_arst | vio_reset),
 
         .i_clientdata(data),
-        .i_clientdata_valid({4{valid}}),
+        .i_clientdata_keep(keep),
+        .i_clientdata_valid(valid),
         .i_last(last),
         .o_ready(ready),
 
