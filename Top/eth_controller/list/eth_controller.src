@@ -59,3 +59,4 @@ IP/sfp_ila/sfp_ila.xci
 IP/sfp_gty_0/sfp_gty_0.xci
 IP/sfp_gty_0_vio_0/sfp_gty_0_vio_0.xci
 IP/mac_vio/mac_vio.xci
+IP/xdma/xdma.xci
