@@ -14,5 +14,6 @@
 -y ./src/phy/pcs/
 -y ./src/phy/pcs/rx/
 -y ./src/phy/pcs/tx/
+-y ./src/pcie/
 
 +incdir+./src/include

@@ -102,10 +102,10 @@ module async_fifo #(
     assign rempty_next = rgraynext == rq2_wgray;
 
     // Register read empty
-    initial o_rempty = 0;
+    initial o_rempty = 1;
     always_ff @(posedge i_rclk or posedge i_rrst)
     if (i_rrst)
-        o_rempty <= 0;
+        o_rempty <= 1;
     else
         o_rempty <= rempty_next;
 

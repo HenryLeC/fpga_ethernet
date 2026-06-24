@@ -7,7 +7,21 @@ module mac (
     input  wire        i_rxclk,
     input  wire [31:0] i_RXD,
     input  wire [3:0]  i_RXC
+
+    // input  wire [31:0] udp_data_tdata,
+    // input  wire [15:0] udp_data_tlength,
+    // input  wire [ 3:0] udp_data_tkeep,
+    // output wire udp_data_tready,
+    // input  wire udp_data_tvalid,
+    // input  wire udp_data_tlast
 );
+
+    wire [31:0] udp_data_tdata;
+    wire [15:0] udp_data_tlength;
+    wire [ 3:0] udp_data_tkeep;
+    wire udp_data_tready;
+    wire udp_data_tvalid;
+    wire udp_data_tlast;
 
     wire vio_reset;
 
@@ -102,10 +116,6 @@ module mac (
         .m_tready(udp_data_tready)
     );
 
-    wire [31:0] udp_data_tdata;
-    wire [15:0] udp_data_tlength;
-    wire [ 3:0] udp_data_tkeep;
-    wire udp_data_tready, udp_data_tvalid, udp_data_tlast;
 
     ipv4_udp_packet_generator packet_generator (
         .i_clk(i_txclk),

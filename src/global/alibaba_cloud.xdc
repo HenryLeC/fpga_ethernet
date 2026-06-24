@@ -154,5 +154,14 @@ set_input_delay 0 [get_ports {pcie_reset_n}]
 # 100 MHz MGT reference clock
 create_clock -period 10 -name pcie_mgt_refclk [get_ports pcie_refclk_p]
 
+# Keep the unrelated free-running clock and transceiver reference clocks out of each other's timing analysis.
+set_clock_groups -asynchronous \
+	-group [get_clocks -include_generated_clocks clk_100mhz] \
+	-group [get_clocks -include_generated_clocks sfp_mgt_refclk] \
+	-group [get_clocks -include_generated_clocks pcie_mgt_refclk]
+
 set_property SEVERITY {Warning} [get_drc_checks AVAL-244]
 set_property SEVERITY {Warning} [get_drc_checks AVAL-245] 
+
+# set_false_path -from [get_clocks -include_generated_clocks sfp_mgt_refclk] -to [get_clocks -include_generated_clocks pcie_mgt_refclk]
+# set_false_path -to [get_clocks -include_generated_clocks sfp_mgt_refclk] -from [get_clocks -include_generated_clocks pcie_mgt_refclk]
