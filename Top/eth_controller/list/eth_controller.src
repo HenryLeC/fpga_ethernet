@@ -55,7 +55,15 @@ src/phy/pma/helpers/sfp_gty_0_example_checking_64b66b_async.v
 src/phy/pma/helpers/sfp_gty_0_example_stimulus_64b66b_async.v
 src/phy/pma/helpers/sfp_gty_0_prbs_any.v
 
+src/pcie/axis_width_convert.sv
+src/pcie/pcie_header_decode.sv
+src/pcie/pcie_to_data_stream.sv
+
 IP/sfp_ila/sfp_ila.xci
 IP/sfp_gty_0/sfp_gty_0.xci
 IP/sfp_gty_0_vio_0/sfp_gty_0_vio_0.xci
 IP/mac_vio/mac_vio.xci
+IP/xdma/xdma.xci
+IP/pcie_ila/pcie_ila.xci
+IP/pcs_ila/pcs_ila.xci
+IP/crc_ila/crc_ila.xci

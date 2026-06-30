@@ -17,6 +17,16 @@ module top (
     inout wire [1:0] sfp_i2c_sda,
     input wire [1:0] sfp_npres,
 
+    output wire [7:0] pcie_tx_p,
+    output wire [7:0] pcie_tx_n,
+    input  wire [7:0] pcie_rx_p,
+    input  wire [7:0] pcie_rx_n,
+
+    input  wire       pcie_refclk_p,
+    input  wire       pcie_refclk_n,
+
+    input  wire       pcie_reset_n,
+
     output wire [3:0] led,
     output wire [1:0] sfp_led
 );
@@ -181,6 +191,13 @@ module top (
         .block_lock(link_status)
     );
 
+    wire [31:0] udp_axis_tdata;
+    wire [3:0] udp_axis_tkeep;
+    wire [15:0] udp_axis_tlength;
+    wire udp_axis_tvalid;
+    wire udp_axis_tready;
+    wire udp_axis_tlast;
+
     mac mac_inst(
         .i_txclk(tx_clk),
         .i_arst(rst_txsync),
@@ -188,7 +205,14 @@ module top (
         .o_TXC(TXC),
         .i_rxclk(rx_clk),
         .i_RXD(RXD),
-        .i_RXC(RXC)
+        .i_RXC(RXC),
+
+        .udp_data_tdata(udp_axis_tdata),
+        .udp_data_tkeep(udp_axis_tkeep),
+        .udp_data_tvalid(udp_axis_tvalid),
+        .udp_data_tready(udp_axis_tready),
+        .udp_data_tlast(udp_axis_tlast),
+        .udp_data_tlength(udp_axis_tlength)
     );
 
     wire [63:0] RXD, TXD;
@@ -206,6 +230,13 @@ module top (
         .header_valid(tx_header_valid)
     );
 
+    pcs_ila pcs_ila_inst (
+        .clk(tx_clk),
+        .probe0(tx_data),
+        .probe1(tx_header),
+        .probe2(tx_header_valid)
+    );
+
     pcs_rx rx_pcs_inst(
         .clk(rx_clk),
         
@@ -216,4 +247,113 @@ module top (
         .RXD(RXD),
         .RXC(RXC)
     );
+
+    wire pcie_axi_clk, pcie_axis_arstn, pcie_reset_n_c;
+
+    wire sys_clk, sys_clk_gt;
+
+    IBUFDS_GTE4 #(
+        .REFCLK_HROW_CK_SEL(2'b00)
+    ) refclk_ibuf (
+        .I(pcie_refclk_p),
+        .IB(pcie_refclk_n),
+        .CEB(1'b0),
+        .O(sys_clk_gt),
+        .ODIV2(sys_clk)
+    );
+    // Reset buffer
+    IBUF sys_reset_n_ibuf (
+        .I(pcie_reset_n),
+        .O(pcie_reset_n_c)
+    );
+
+    wire [255:0] s_axis_c2h_tdata_0;
+    wire         s_axis_c2h_tlast_0;
+    wire         s_axis_c2h_tvalid_0;
+    wire         s_axis_c2h_tready_0;
+    wire [ 31:0] s_axis_c2h_tkeep_0;
+
+    wire [255:0] m_axis_h2c_tdata_0;
+    wire         m_axis_h2c_tlast_0;
+    wire         m_axis_h2c_tvalid_0;
+    wire         m_axis_h2c_tready_0;
+    wire [ 31:0] m_axis_h2c_tkeep_0;
+
+    assign s_axis_c2h_tdata_0 = 0;
+    assign s_axis_c2h_tvalid_0 = 0;
+    assign s_axis_c2h_tkeep_0 = 0;
+    assign s_axis_c2h_tlast_0 = 0;
+
+
+    xdma pcie_dma_inst (
+        .sys_clk(sys_clk),                                    // input wire sys_clk
+        .sys_clk_gt(sys_clk_gt),                              // input wire sys_clk_gt
+        .sys_rst_n(pcie_reset_n_c),                                // input wire sys_rst_n
+
+        .user_lnk_up(),                            // output wire user_lnk_up
+
+        .pci_exp_txp(pcie_tx_p),                            // output wire [7 : 0] pci_exp_txp
+        .pci_exp_txn(pcie_tx_n),                            // output wire [7 : 0] pci_exp_txn
+        .pci_exp_rxp(pcie_rx_p),                            // input wire [7 : 0] pci_exp_rxp
+        .pci_exp_rxn(pcie_rx_n),                            // input wire [7 : 0] pci_exp_rxn
+
+        .axi_aclk(pcie_axi_clk),                                  // output wire axi_aclk
+        .axi_aresetn(pcie_axis_arstn),                            // output wire axi_aresetn
+
+        .usr_irq_req(1'b0),                            // input wire [0 : 0] usr_irq_req
+        .usr_irq_ack(),                            // output wire [0 : 0] usr_irq_ack
+        .msi_enable(),                              // output wire msi_enable
+        .msi_vector_width(),                  // output wire [2 : 0] msi_vector_width
+        
+        .cfg_mgmt_addr(19'b0),                        // input wire [18 : 0] cfg_mgmt_addr
+        .cfg_mgmt_write(1'b0),                      // input wire cfg_mgmt_write
+        .cfg_mgmt_write_data(32'b0),            // input wire [31 : 0] cfg_mgmt_write_data
+        .cfg_mgmt_byte_enable(4'b0),          // input wire [3 : 0] cfg_mgmt_byte_enable
+        .cfg_mgmt_read(1'b0),                        // input wire cfg_mgmt_read
+        .cfg_mgmt_read_data(),              // output wire [31 : 0] cfg_mgmt_read_data
+        .cfg_mgmt_read_write_done(),  // output wire cfg_mgmt_read_write_done
+        
+        .s_axis_c2h_tdata_0(s_axis_c2h_tdata_0),              // input wire [255 : 0] s_axis_c2h_tdata_0
+        .s_axis_c2h_tlast_0(s_axis_c2h_tlast_0),              // input wire s_axis_c2h_tlast_0
+        .s_axis_c2h_tvalid_0(s_axis_c2h_tvalid_0),            // input wire s_axis_c2h_tvalid_0
+        .s_axis_c2h_tready_0(s_axis_c2h_tready_0),            // output wire s_axis_c2h_tready_0
+        .s_axis_c2h_tkeep_0(s_axis_c2h_tkeep_0),              // input wire [31 : 0] s_axis_c2h_tkeep_0
+        
+        .m_axis_h2c_tdata_0(m_axis_h2c_tdata_0),              // output wire [255 : 0] m_axis_h2c_tdata_0
+        .m_axis_h2c_tlast_0(m_axis_h2c_tlast_0),              // output wire m_axis_h2c_tlast_0
+        .m_axis_h2c_tvalid_0(m_axis_h2c_tvalid_0),            // output wire m_axis_h2c_tvalid_0
+        .m_axis_h2c_tready_0(m_axis_h2c_tready_0),            // input wire m_axis_h2c_tready_0
+        .m_axis_h2c_tkeep_0(m_axis_h2c_tkeep_0)              // output wire [31 : 0] m_axis_h2c_tkeep_0
+    );
+
+    pcie_to_data_stream pcie_conv_inst (
+        .pcie_axis_clk(pcie_axi_clk),
+        .pcie_axis_arstn(pcie_axis_arstn),
+        
+        .pcie_axis_tdata(m_axis_h2c_tdata_0),
+        .pcie_axis_tvalid(m_axis_h2c_tvalid_0),
+        .pcie_axis_tkeep(m_axis_h2c_tkeep_0),
+        .pcie_axis_tlast(m_axis_h2c_tlast_0),
+        .pcie_axis_tready(m_axis_h2c_tready_0),
+
+        .eth_axis_clk(tx_clk),
+        .eth_axis_arstn(~rst_txsync),
+        
+        .eth_axis_tdata(udp_axis_tdata),
+        .eth_axis_tvalid(udp_axis_tvalid),
+        .eth_axis_tkeep(udp_axis_tkeep),
+        .eth_axis_tlast(udp_axis_tlast),
+        .eth_axis_tready(udp_axis_tready),
+        .data_length(udp_axis_tlength)
+    );
+
+    pcie_ila pcie_ila_inst (
+        .clk(tx_clk),
+        .probe0(udp_axis_tdata),
+        .probe1(udp_axis_tkeep),
+        .probe2(udp_axis_tvalid),
+        .probe3(udp_axis_tlast),
+        .probe4(udp_axis_tready)
+    );
+
 endmodule

@@ -22,12 +22,13 @@ module udp_packet_encode #(
     input  wire  [15:0] destination_port,
     input  wire  [15:0] data_length
 );
-    localparam X_IDLE = 2'd0;
-    localparam X_HEAD = 2'd1;
-    localparam X_DATA = 2'd2;
+    localparam X_IDLE = 3'd0;
+    localparam X_HEAD = 3'd1;
+    localparam X_DATA = 3'd2;
+    localparam X_LOCK = 3'd3;
 
-    reg [1:0] current_state = X_IDLE;
-    reg [1:0] next_state;
+    reg [2:0] current_state = X_IDLE;
+    reg [2:0] next_state;
 
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
@@ -39,7 +40,8 @@ module udp_packet_encode #(
     case (current_state)
         X_IDLE: next_state = m_axis_tvalid & m_axis_tready ? X_HEAD : X_IDLE;
         X_HEAD: next_state = X_DATA;
-        X_DATA: next_state = s_axis_tlast ? X_IDLE : X_DATA;
+        X_DATA: next_state = s_axis_tlast ? X_LOCK : X_DATA;
+        X_LOCK: next_state = !m_axis_tready ? X_IDLE : X_LOCK;
         default: next_state = X_IDLE;
     endcase
 
