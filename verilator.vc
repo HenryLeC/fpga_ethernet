@@ -2,6 +2,8 @@
 -y /opt/Vivado/2025.2/data/verilog/src/unisims/ 
 +incdir+/opt/Vivado/2025.2/data/verilog/src/ 
 
+-y ./mocks/
+
 -y ./src/
 -y ./src/helpers/
 -y ./src/ipv4/
