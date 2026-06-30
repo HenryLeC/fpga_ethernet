@@ -7,6 +7,15 @@ module crc_calc (
     output wire [31:0] o_crc
 );
 
+    crc_ila crc_ila_inst (
+        .clk(i_clk),
+        .probe0(i_arst),
+        .probe1(i_data),
+        .probe2(i_keep),
+        .probe3(i_valid),
+        .probe4(o_crc)
+    );
+
     reg [31:0] lookup_0 [0:255];
     reg [31:0] lookup_1 [0:255];
     reg [31:0] lookup_2 [0:255];
