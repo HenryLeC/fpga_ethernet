@@ -67,5 +67,5 @@ module axis_width_convert(
     3'd7: next_dword_low_keep = 0;
     endcase
 
-    assign s_axis_tready = !stored_valid | &position | m_axis_tlast;
+    assign s_axis_tready = !stored_valid | (&position & m_axis_tready) | m_axis_tlast;
 endmodule

@@ -23,7 +23,8 @@ module pcie_to_data_stream (
     wire sync_full, sync_empty;
     assign pcie_axis_tready = ~sync_full;
     async_fifo #(
-        .DATA_WIDTH(256+32+1)
+        .DATA_WIDTH(256+32+1),
+        .ADDRESS_WIDTH(2)
     ) pcie_eth_sync_inst (
         .i_wclk(pcie_axis_clk),
         .i_wrst(~pcie_axis_arstn),

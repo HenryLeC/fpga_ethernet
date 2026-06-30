@@ -6,22 +6,22 @@ module mac (
 
     input  wire        i_rxclk,
     input  wire [31:0] i_RXD,
-    input  wire [3:0]  i_RXC
+    input  wire [3:0]  i_RXC,
 
-    // input  wire [31:0] udp_data_tdata,
-    // input  wire [15:0] udp_data_tlength,
-    // input  wire [ 3:0] udp_data_tkeep,
-    // output wire udp_data_tready,
-    // input  wire udp_data_tvalid,
-    // input  wire udp_data_tlast
+    input  wire [31:0] udp_data_tdata,
+    input  wire [15:0] udp_data_tlength,
+    input  wire [ 3:0] udp_data_tkeep,
+    output wire udp_data_tready,
+    input  wire udp_data_tvalid,
+    input  wire udp_data_tlast
 );
 
-    wire [31:0] udp_data_tdata;
-    wire [15:0] udp_data_tlength;
-    wire [ 3:0] udp_data_tkeep;
-    wire udp_data_tready;
-    wire udp_data_tvalid;
-    wire udp_data_tlast;
+    // wire [31:0] udp_data_tdata;
+    // wire [15:0] udp_data_tlength;
+    // wire [ 3:0] udp_data_tkeep;
+    // wire udp_data_tready;
+    // wire udp_data_tvalid;
+    // wire udp_data_tlast;
 
     wire vio_reset;
 
@@ -100,21 +100,21 @@ module mac (
         .m_axis_tlen(recv_tlen)
     );
 
-    sync_fifo #(
-        .DATA_WIDTH(32+16+4+1),
-        .ADDRESS_WIDTH(5)
-    ) fifo_buffer (
-        .i_clk(i_txclk),
-        .i_arst(i_arst | vio_reset),
+    // sync_fifo #(
+    //     .DATA_WIDTH(32+16+4+1),
+    //     .ADDRESS_WIDTH(5)
+    // ) fifo_buffer (
+    //     .i_clk(i_txclk),
+    //     .i_arst(i_arst | vio_reset),
 
-        .s_tdata({recv_tlen, recv_tlast, recv_tkeep, recv_tdata}),
-        .s_tvalid(recv_tvalid),
-        .s_tready(recv_tready),
+    //     .s_tdata({recv_tlen, recv_tlast, recv_tkeep, recv_tdata}),
+    //     .s_tvalid(recv_tvalid),
+    //     .s_tready(recv_tready),
 
-        .m_tdata({udp_data_tlength, udp_data_tlast, udp_data_tkeep, udp_data_tdata}),
-        .m_tvalid(udp_data_tvalid),
-        .m_tready(udp_data_tready)
-    );
+    //     .m_tdata({udp_data_tlength, udp_data_tlast, udp_data_tkeep, udp_data_tdata}),
+    //     .m_tvalid(udp_data_tvalid),
+    //     .m_tready(udp_data_tready)
+    // );
 
 
     ipv4_udp_packet_generator packet_generator (

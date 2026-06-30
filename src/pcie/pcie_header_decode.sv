@@ -11,13 +11,18 @@ module pcie_header_decode (
     output reg        header_valid
 );
 
+    reg lockout;
+
     initial header_valid = 0;
+    initial lockout = 0;
     always_ff @(posedge axis_clk or negedge axis_arstn)
     if (!axis_arstn)
-        header_valid <= 0;
+        {header_valid, lockout} <= 0;
     else if (header_valid & s_axis_tlast)
-        header_valid <= 0;
-    else if (!header_valid & s_axis_tvalid)
+        lockout <= 1;
+    else if (lockout & !s_axis_tlast)
+        {lockout, header_valid} <= 0;
+    else if (!lockout & !header_valid & s_axis_tvalid)
         header_valid <= 1;
 
     assign s_axis_tready = !header_valid;

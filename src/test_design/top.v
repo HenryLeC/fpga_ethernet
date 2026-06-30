@@ -195,7 +195,7 @@ module top (
     wire [3:0] udp_axis_tkeep;
     wire [15:0] udp_axis_tlength;
     wire udp_axis_tvalid;
-    wire udp_axis_tready = 1;
+    wire udp_axis_tready;
     wire udp_axis_tlast;
 
     mac mac_inst(
@@ -205,14 +205,14 @@ module top (
         .o_TXC(TXC),
         .i_rxclk(rx_clk),
         .i_RXD(RXD),
-        .i_RXC(RXC)
+        .i_RXC(RXC),
 
-        // .udp_data_tdata(udp_axis_tdata),
-        // .udp_data_tkeep(udp_axis_tkeep),
-        // .udp_data_tvalid(udp_axis_tvalid),
-        // .udp_data_tready(udp_axis_tready),
-        // .udp_data_tlast(udp_axis_tlast),
-        // .udp_data_tlength(udp_axis_tlength)
+        .udp_data_tdata(udp_axis_tdata),
+        .udp_data_tkeep(udp_axis_tkeep),
+        .udp_data_tvalid(udp_axis_tvalid),
+        .udp_data_tready(udp_axis_tready),
+        .udp_data_tlast(udp_axis_tlast),
+        .udp_data_tlength(udp_axis_tlength)
     );
 
     wire [63:0] RXD, TXD;
@@ -228,6 +228,13 @@ module top (
         .tx_data(tx_data),
         .tx_header(tx_header),
         .header_valid(tx_header_valid)
+    );
+
+    pcs_ila pcs_ila_inst (
+        .clk(tx_clk),
+        .probe0(tx_data),
+        .probe1(tx_header),
+        .probe2(tx_header_valid)
     );
 
     pcs_rx rx_pcs_inst(
@@ -272,11 +279,10 @@ module top (
     wire         m_axis_h2c_tready_0;
     wire [ 31:0] m_axis_h2c_tkeep_0;
 
-    assign s_axis_c2h_tdata_0 = m_axis_h2c_tdata_0;
-    assign s_axis_c2h_tvalid_0 = m_axis_h2c_tvalid_0;
-    assign s_axis_c2h_tkeep_0 = m_axis_h2c_tkeep_0;
-    assign s_axis_c2h_tlast_0 = m_axis_h2c_tlast_0;
-    assign m_axis_h2c_tready_0 = s_axis_c2h_tready_0;
+    assign s_axis_c2h_tdata_0 = 0;
+    assign s_axis_c2h_tvalid_0 = 0;
+    assign s_axis_c2h_tkeep_0 = 0;
+    assign s_axis_c2h_tlast_0 = 0;
 
 
     xdma pcie_dma_inst (
@@ -320,25 +326,34 @@ module top (
         .m_axis_h2c_tkeep_0(m_axis_h2c_tkeep_0)              // output wire [31 : 0] m_axis_h2c_tkeep_0
     );
 
-    // pcie_to_data_stream pcie_conv_inst (
-    //     .pcie_axis_clk(pcie_axi_clk),
-    //     .pcie_axis_arstn(pcie_axis_arstn),
+    pcie_to_data_stream pcie_conv_inst (
+        .pcie_axis_clk(pcie_axi_clk),
+        .pcie_axis_arstn(pcie_axis_arstn),
         
-    //     .pcie_axis_tdata(m_axis_h2c_tdata_0),
-    //     .pcie_axis_tvalid(m_axis_h2c_tvalid_0),
-    //     .pcie_axis_tkeep(m_axis_h2c_tkeep_0),
-    //     .pcie_axis_tlast(m_axis_h2c_tlast_0),
-    //     .pcie_axis_tready(m_axis_h2c_tready_0),
+        .pcie_axis_tdata(m_axis_h2c_tdata_0),
+        .pcie_axis_tvalid(m_axis_h2c_tvalid_0),
+        .pcie_axis_tkeep(m_axis_h2c_tkeep_0),
+        .pcie_axis_tlast(m_axis_h2c_tlast_0),
+        .pcie_axis_tready(m_axis_h2c_tready_0),
 
-    //     .eth_axis_clk(tx_clk),
-    //     .eth_axis_arstn(~rst_txsync),
+        .eth_axis_clk(tx_clk),
+        .eth_axis_arstn(~rst_txsync),
         
-    //     .eth_axis_tdata(udp_axis_tdata),
-    //     .eth_axis_tvalid(udp_axis_tvalid),
-    //     .eth_axis_tkeep(udp_axis_tkeep),
-    //     .eth_axis_tlast(udp_axis_tlast),
-    //     .eth_axis_tready(udp_axis_tready),
-    //     .data_length(udp_axis_tlength)
-    // );
+        .eth_axis_tdata(udp_axis_tdata),
+        .eth_axis_tvalid(udp_axis_tvalid),
+        .eth_axis_tkeep(udp_axis_tkeep),
+        .eth_axis_tlast(udp_axis_tlast),
+        .eth_axis_tready(udp_axis_tready),
+        .data_length(udp_axis_tlength)
+    );
+
+    pcie_ila pcie_ila_inst (
+        .clk(tx_clk),
+        .probe0(udp_axis_tdata),
+        .probe1(udp_axis_tkeep),
+        .probe2(udp_axis_tvalid),
+        .probe3(udp_axis_tlast),
+        .probe4(udp_axis_tready)
+    );
 
 endmodule

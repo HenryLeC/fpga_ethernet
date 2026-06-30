@@ -2,7 +2,8 @@ from pathlib import Path
 
 import cocotb
 from cocotb_tools.runner import get_runner
-from cocotb.triggers import RisingEdge, Timer
+from cocotb.triggers import Event, RisingEdge, Timer
+from cocotbext.axi import AxiStreamFrame, AxiStreamSource, AxiStreamBus
 
 import csv
 
@@ -22,7 +23,6 @@ def test_mac_runner():
             "--trace-structs",
             "-F",
             f"{proj_path / "verilator.vc"}",
-            f"-I{Path(__file__).resolve().parent / "./mocks"}",
         ],
     )
     runner.test(
@@ -52,6 +52,21 @@ async def test_mac(dut):
 
         reader = csv.reader(f)
 
+        data = (
+            [ord(i) for i in "Hello, this is a test of pcie to udp sending."]
+            + [0, 0, 0]
+            + [0 for _ in range(0x10 * 15)]
+        )
+        assert len(data) == 0x120
+
+        source = AxiStreamSource(
+            AxiStreamBus(dut, "udp_data"),
+            dut.i_txclk,
+            dut.i_arst,
+            reset_active_level=True,
+        )
+        dut.udp_data_tlength.value = 0x120
+
         cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
 
         dut.i_arst.value = 1
@@ -59,6 +74,9 @@ async def test_mac(dut):
         await RisingEdge(dut.i_rxclk)
 
         dut.i_arst.value = 0
+
+        frame = AxiStreamFrame(tdata=data, tx_complete=Event())
+        cocotb.start_soon(source.send(frame))
 
         next(reader)
         next(reader)

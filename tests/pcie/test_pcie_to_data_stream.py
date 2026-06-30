@@ -47,7 +47,7 @@ async def generate_clock(dut):
 @cocotb.test()
 async def test_pcie_to_data_stream(dut):
 
-    data = [0x00, 0x10] + [0 for _ in range(30)] + [i for i in range(0x0010)]
+    data = [0x01, 0x40] + [0 for _ in range(30)] + [i % 256 for i in range(0x0140)]
 
     source = AxiStreamSource(
         AxiStreamBus(dut, "pcie_axis"),
@@ -76,13 +76,33 @@ async def test_pcie_to_data_stream(dut):
 
     frame = AxiStreamFrame(tdata=data, tx_complete=Event())
     cocotb.start_soon(source.send(frame))
-    dut.eth_axis_tready.value = 1
 
     await RisingEdge(dut.eth_axis_clk)
+    sink.set_pause_generator(pause_gen())
 
     recv_data = await sink.read()
 
     for tx, rx in zip(data[32:], recv_data):
         assert tx == rx
 
-    assert dut.data_length.value == 0x10
+    assert dut.data_length.value == 0x0140
+
+    await RisingEdge(dut.eth_axis_clk)
+    await RisingEdge(dut.eth_axis_clk)
+    await RisingEdge(dut.eth_axis_clk)
+    await RisingEdge(dut.eth_axis_clk)
+
+    cocotb.start_soon(source.send(frame))
+
+    recv_data = await sink.read()
+
+    for tx, rx in zip(data[32:], recv_data):
+        assert tx == rx
+
+
+def pause_gen():
+    paused = True
+    while True:
+        paused = not paused
+        for i in range(5):
+            yield paused
