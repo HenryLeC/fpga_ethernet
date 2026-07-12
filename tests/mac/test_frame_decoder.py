@@ -54,15 +54,22 @@ async def check_packet(dut):
         0x00000000,
         0x00000000,
         0x00000000,
+        0xE5BFB3A8,
     ]
 
     await RisingEdge(dut.m_axis_tvalid)
-    await FallingEdge(dut.i_clk)
 
-    for dword in packet:
-        assert dut.m_axis_tdata.value == dword
-        assert dut.m_axis_tkeep.value == 0xF
+    i = 0
+    while True:
         await FallingEdge(dut.i_clk)
+        if not dut.m_axis_tvalid.value:
+            continue
+        if int(dut.m_axis_tkeep.value) & 0xF:
+            assert packet[i] == int(dut.m_axis_tdata.value) & 0xFFFFFFFF
+            i += 1
+        if int(dut.m_axis_tkeep.value) & 0xF0:
+            assert packet[i] == (int(dut.m_axis_tdata.value) >> 32) & 0xFFFFFFFF
+            i += 1
 
 
 @cocotb.test()
@@ -79,25 +86,16 @@ async def test_frame_decoder(dut):
     dut.i_arst.value = 0
 
     frame = [
-        (1, 0x555555FB),
-        (0, 0xD5555555),
-        (0, 0xFFFFFFFF),
-        (0, 0x01C0FFFF),
-        (0, 0xCB35F222),
-        (0, 0x01000608),
-        (0, 0x04060008),
-        (0, 0x01C00100),
-        (0, 0xCB35F222),
-        (0, 0xCD01000A),
-        (0, 0x00000000),
-        (0, 0x01010000),
-        (0, 0x00000101),
-        (0, 0x00000000),
-        (0, 0x00000000),
-        (0, 0x00000000),
-        (0, 0x00000000),
-        (0, 0xE5BFB3A8),
-        (0xF, 0x070707FD),
+        (1, 0xD5555555555555FB),
+        (0, 0x01C0FFFFFFFFFFFF),
+        (0, 0x01000608CB35F222),
+        (0, 0x01C0010004060008),
+        (0, 0xCD01000ACB35F222),
+        (0, 0x0101000000000000),
+        (0, 0x0000000000000101),
+        (0, 0x0000000000000000),
+        (0, 0xE5BFB3A800000000),
+        (0xFF, 0x07007070070707FD),
     ]
 
     for cycle in frame:
