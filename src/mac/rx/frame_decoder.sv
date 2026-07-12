@@ -12,6 +12,9 @@ module frame_decoder #(
     input  wire [(BYTE_LANES * 8) - 1:0] i_RXD,
     input  wire [BYTE_LANES - 1:0] i_RXC,
 
+    output logic [47:0] source_address,
+    output logic [47:0] destination_address,
+
     output logic        m_axis_tvalid,
     output logic [(BYTE_LANES * 8) - 1:0] m_axis_tdata,
     output logic [BYTE_LANES - 1:0] m_axis_tkeep,
@@ -159,4 +162,20 @@ module frame_decoder #(
 
     assign crc_check = crc == recv_crc;
     assign m_axis_tinvalid = !m_axis_tvalid & ~crc_check;
+
+    always_ff @(posedge i_clk or posedge i_arst)
+    if (i_arst) begin
+        destination_address <= 0;
+        source_address <= 0;
+    end
+    else begin
+        if (next_state_w[7] == X_ADDRESS & proc_count_q == 3) begin
+            destination_address <= {<<8{i_RXD[15:0], prev_RXD[63 : 32]}};
+            source_address <= {<<8{i_RXD[63 -: 48]}};
+        end
+        if (next_state_w[3] == X_ADDRESS & next_state_w[4] == X_DATA) begin
+            destination_address <= {<<8{prev_RXD[47:0]}};
+            source_address <= {<<8{i_RXD[31:0], prev_RXD[63:48]}};
+        end
+    end
 endmodule

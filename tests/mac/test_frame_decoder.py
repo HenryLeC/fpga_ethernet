@@ -70,6 +70,8 @@ async def check_packet(dut):
         if int(dut.m_axis_tkeep.value) & 0xF0:
             assert packet[i] == (int(dut.m_axis_tdata.value) >> 32) & 0xFFFFFFFF
             i += 1
+        if dut.m_axis_tlast.value:
+            return
 
 
 @cocotb.test()
@@ -95,15 +97,46 @@ async def test_frame_decoder(dut):
         (0, 0x0000000000000101),
         (0, 0x0000000000000000),
         (0, 0xE5BFB3A800000000),
-        (0xFF, 0x07007070070707FD),
+        (0xFF, 0x07070707070707FD),
     ]
+
+    await send_frame(dut, frame)
+
+    assert dut.m_axis_tlast.value
+    await RisingEdge(dut.i_clk)
+    assert not dut.m_axis_tinvalid.value
+
+    assert dut.source_address.value == 0xC00122F235CB
+    assert dut.destination_address.value == 0xFFFFFFFFFFFF
+
+    frame2 = [
+        (0x1F, 0x555555FB07070707),
+        (0, 0xFFFFFFFFD5555555),
+        (0, 0xCB35F22201C0FAFF),
+        (0, 0x0406000801000608),
+        (0, 0xCB35F22201C00100),
+        (0, 0x00000000CD01000A),
+        (0, 0x0000010101010000),
+        (0, 0x0000000000000000),
+        (0, 0x0000000000000000),
+        (0xFF, 0x070707FDE5BFB3A8),
+        (0xFF, 0x0707070707070707),
+    ]
+
+    await send_frame(dut, frame2)
+
+    assert dut.m_axis_tlast.value
+    await RisingEdge(dut.i_clk)
+    assert dut.m_axis_tinvalid.value
+
+    assert dut.source_address.value == 0xC00122F235CB
+    assert dut.destination_address.value == 0xFFFFFFFFFFFA
+
+
+async def send_frame(dut, frame):
 
     for cycle in frame:
         dut.i_RXC.value = cycle[0]
         dut.i_RXD.value = cycle[1]
 
         await RisingEdge(dut.i_clk)
-
-    assert dut.m_axis_tlast.value
-    await RisingEdge(dut.i_clk)
-    assert not dut.m_axis_tinvalid.value
