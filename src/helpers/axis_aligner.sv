@@ -66,12 +66,19 @@ module axis_aligner #(
             m_axis_tlast  = s_axis_tlast;
             s_axis_tready = m_axis_tready;
         end
-        else if (state == SHIFT | state == SHIFT_LAST) begin
+        else if (state == SHIFT) begin
             m_axis_tdata  = tdata_packed;
             m_axis_tkeep  = tkeep_packed;
             m_axis_tvalid = tvalid_packed;
             m_axis_tlast  = tlast_packed;
             s_axis_tready = m_axis_tready | !tvalid_q;
+        end
+        else if (state == SHIFT_LAST) begin
+            m_axis_tdata  = tdata_packed;
+            m_axis_tkeep  = tkeep_packed;
+            m_axis_tvalid = tvalid_packed;
+            m_axis_tlast  = tlast_packed;
+            s_axis_tready = 0;
         end
         else begin
             m_axis_tdata  = 0;
@@ -97,7 +104,7 @@ module axis_aligner #(
         .BYTE_WIDTH(1)
     ) keep_packer (
         tkeep_q,
-        s_axis_tkeep,
+        state == SHIFT_LAST ? 0 : s_axis_tkeep,
         shift_count,
 
         tkeep_packed
