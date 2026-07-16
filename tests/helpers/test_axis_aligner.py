@@ -70,13 +70,13 @@ async def verify_receive_bytes(dut, count, event: Event):
 async def master_ready_toggle(dut):
     while True:
         await dut.i_clk.rising_edge
-        # dut.m_axis_tready.value = random.randint(0, 1)
-        dut.m_axis_tready.value = True
+        dut.m_axis_tready.value = random.randint(0, 1) == 1
+        # dut.m_axis_tready.value = True
 
 
 def valid_gen():
     while True:
-        yield True
+        yield random.randint(0, 1) == 1
 
 
 async def axis_send(
@@ -86,7 +86,9 @@ async def axis_send(
     valid = False
     while not (valid and dut.s_axis_tready.value):
         valid = next(valid_generator, True)
-        dut.s_axis_tdata.value = list_to_value(([0] * start_offset) + bytes[:index])
+        dut.s_axis_tdata.value = (
+            list_to_value(([0] * start_offset) + bytes[:index]) if valid else 0
+        )
         dut.s_axis_tkeep.value = offset_to_keep(start_offset)
         dut.s_axis_tlast.value = index > len(bytes)
         dut.s_axis_tvalid.value = valid
@@ -102,16 +104,20 @@ async def axis_send(
                 break
             index += 8
 
+        valid = next(valid_generator)
+
         if index <= len(bytes):
-            dut.s_axis_tdata.value = list_to_value(bytes[index - 8 : index])
+            dut.s_axis_tdata.value = (
+                list_to_value(bytes[index - 8 : index]) if valid else 0
+            )
             dut.s_axis_tkeep.value = 0xFF
             dut.s_axis_tlast.value = index == len(bytes)
-            dut.s_axis_tvalid.value = next(valid_generator)
+            dut.s_axis_tvalid.value = valid
         else:
-            dut.s_axis_tdata.value = list_to_value(bytes[index - 8 :])
+            dut.s_axis_tdata.value = list_to_value(bytes[index - 8 :]) if valid else 0
             dut.s_axis_tkeep.value = 0xFF >> (8 - (len(bytes[index - 8 :])))
             dut.s_axis_tlast.value = True
-            dut.s_axis_tvalid.value = next(valid_generator)
+            dut.s_axis_tvalid.value = valid
 
     dut.s_axis_tvalid.value = False
 

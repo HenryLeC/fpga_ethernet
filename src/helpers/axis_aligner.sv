@@ -43,11 +43,17 @@ module axis_aligner #(
         endcase
     end
 
+    logic master_read;
+    assign master_read = m_axis_tvalid & m_axis_tready;
+
+    logic slave_read;
+    assign slave_read = s_axis_tvalid & s_axis_tready;
+
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
         state <= IDLE;
     else
-        state <= next_state;
+        state <= (master_read | slave_read) ? next_state : state;
 
     always_ff @(posedge i_clk) begin
         if (s_axis_tvalid & s_axis_tready) begin
