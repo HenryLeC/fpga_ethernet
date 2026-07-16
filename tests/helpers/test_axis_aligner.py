@@ -4,7 +4,7 @@ from typing import Generator
 import cocotb
 import random
 from cocotb_tools.runner import get_runner
-from cocotb.triggers import FallingEdge, RisingEdge, Timer, Event
+from cocotb.triggers import RisingEdge, Timer, Event
 
 
 def test_axis_aligner_runner():
@@ -166,3 +166,40 @@ def list_to_value(items):
 
 def offset_to_keep(offset):
     return (0xFF << offset) & 0xFF
+
+
+@cocotb.test()
+async def test_axis_aligner_singe_cycle(dut):
+    cocotb.start_soon(generate_clock(dut))
+
+    dut.i_arst.value = 1
+
+    await dut.i_clk.rising_edge
+
+    dut.i_arst.value = 0
+
+    dut.s_axis_tvalid.value = True
+    dut.s_axis_tdata.value = list_to_value([1, 2, 3])
+    dut.s_axis_tkeep.value = 0b111
+    dut.s_axis_tlast.value = True
+
+    await dut.i_clk.rising_edge
+
+    assert dut.m_axis_tkeep.value == 0b111
+    assert dut.m_axis_tdata.value == list_to_value([1, 2, 3])
+    assert dut.m_axis_tvalid.value
+    assert dut.m_axis_tlast.value
+
+    dut.s_axis_tvalid.value = True
+    dut.s_axis_tdata.value = list_to_value([0, 0, 1, 2, 3])
+    dut.s_axis_tkeep.value = 0b11100
+    dut.s_axis_tlast.value = True
+
+    dut.m_axis_tready.value = True
+
+    await dut.i_clk.rising_edge
+    await dut.i_clk.rising_edge
+
+    assert dut.m_axis_tkeep.value == 0b111
+    assert dut.m_axis_tdata.value == list_to_value([1, 2, 3])
+    assert dut.m_axis_tvalid.value

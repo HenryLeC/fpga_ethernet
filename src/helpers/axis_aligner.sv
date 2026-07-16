@@ -24,9 +24,10 @@ module axis_aligner #(
 
     logic [$clog2(BYTE_LANES) - 1 : 0] shift_count;
 
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] {
         IDLE,
         PASSTHROUGH,
+        PASSTHROUGH_SKIP,
         SHIFT,
         SHIFT_LAST
     } state_t;
@@ -35,7 +36,9 @@ module axis_aligner #(
 
     always_comb begin
         case (state)
-            IDLE:        next_state = s_axis_tvalid ? (s_axis_tkeep[0] ? PASSTHROUGH : SHIFT) : IDLE;
+            PASSTHROUGH_SKIP,
+            IDLE:        next_state = s_axis_tvalid ? (
+                s_axis_tkeep[0] ? (s_axis_tlast ? PASSTHROUGH_SKIP : PASSTHROUGH) : (s_axis_tlast ? SHIFT_LAST : SHIFT)) : IDLE;
             PASSTHROUGH: next_state = s_axis_tlast ? IDLE : PASSTHROUGH;
             SHIFT:       next_state = s_axis_tlast ? (!s_axis_tkeep[shift_count] ? IDLE : SHIFT_LAST) : SHIFT;
             SHIFT_LAST:  next_state = IDLE;
@@ -65,7 +68,7 @@ module axis_aligner #(
     end
 
     always_comb begin
-        if ((state == IDLE & next_state == PASSTHROUGH) | state == PASSTHROUGH) begin
+        if (((state == IDLE | state == PASSTHROUGH_SKIP) & (next_state == PASSTHROUGH | next_state == PASSTHROUGH_SKIP)) | state == PASSTHROUGH) begin
             m_axis_tdata  = s_axis_tdata;
             m_axis_tkeep  = s_axis_tkeep;
             m_axis_tvalid = s_axis_tvalid;
@@ -134,7 +137,7 @@ module axis_aligner #(
     always_ff @(posedge i_clk or posedge i_arst)
     if (i_arst)
         shift_count <= 0;
-    else if (state == IDLE & next_state == SHIFT)
+    else if ((state == IDLE | state == PASSTHROUGH_SKIP) & (next_state == SHIFT | next_state == SHIFT_LAST))
         shift_count <= shift_count_w;
 
     always_comb begin
