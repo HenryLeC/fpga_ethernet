@@ -42,36 +42,44 @@ async def generate_clock(dut):
 
 async def check_packet(dut):
     packet = [
-        0x01000608,
-        0x04060008,
-        0x01C00100,
-        0xCB35F222,
-        0xCD01000A,
+        0x00080100,
+        0x01000406,
+        0xF22201C0,
+        0x000ACB35,
+        0x0000CD01,
         0x00000000,
-        0x01010000,
-        0x00000101,
-        0x00000000,
+        0x01010101,
         0x00000000,
         0x00000000,
         0x00000000,
-        0xE5BFB3A8,
+        0x00000000,
+        0xB3A80000,
+        0x0000E5BF,
     ]
+
+    bytes = []
+    for dword in packet:
+        for i in range(4):
+            bytes.append((dword >> (i * 8)) & 0xFF)
 
     await RisingEdge(dut.m_axis_tvalid)
 
+    bytes = bytes[:-2]
+
     i = 0
     while True:
-        await FallingEdge(dut.i_clk)
-        if not dut.m_axis_tvalid.value:
-            continue
-        if int(dut.m_axis_tkeep.value) & 0xF:
-            assert packet[i] == int(dut.m_axis_tdata.value) & 0xFFFFFFFF
-            i += 1
-        if int(dut.m_axis_tkeep.value) & 0xF0:
-            assert packet[i] == (int(dut.m_axis_tdata.value) >> 32) & 0xFFFFFFFF
-            i += 1
-        if dut.m_axis_tlast.value:
-            return
+        await dut.i_clk.rising_edge
+        if dut.m_axis_tvalid.value:
+            for shift in range(8):
+                if (int(dut.m_axis_tkeep.value) >> shift) & 1:
+                    assert (
+                        bytes[i] == (int(dut.m_axis_tdata.value) >> (shift * 8)) & 0xFF
+                    )
+                    i += 1
+
+            if dut.m_axis_tlast.value:
+                assert i == len(bytes)
+                break
 
 
 @cocotb.test()
@@ -109,6 +117,8 @@ async def test_frame_decoder(dut):
     assert dut.source_address.value == 0xC00122F235CB
     assert dut.destination_address.value == 0xFFFFFFFFFFFF
 
+    assert dut.ether_type.value == 0x0806
+
     frame2 = [
         (0x1F, 0x555555FB07070707),
         (0, 0xFFFFFFFFD5555555),
@@ -131,6 +141,8 @@ async def test_frame_decoder(dut):
 
     assert dut.source_address.value == 0xC00122F235CB
     assert dut.destination_address.value == 0xFFFFFFFFFFFA
+
+    assert dut.ether_type.value == 0x0806
 
 
 async def send_frame(dut, frame):

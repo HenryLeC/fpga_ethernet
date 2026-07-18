@@ -15,6 +15,8 @@ module frame_decoder #(
     output logic [47:0] source_address,
     output logic [47:0] destination_address,
 
+    output logic [15:0] ether_type,
+
     output logic        m_axis_tvalid,
     output logic [(BYTE_LANES * 8) - 1:0] m_axis_tdata,
     output logic [BYTE_LANES - 1:0] m_axis_tkeep,
@@ -26,11 +28,12 @@ module frame_decoder #(
 
     typedef enum logic [2:0] 
     {
-         X_IDLE     = 3'd0
-        ,X_START    = 3'd1
-        ,X_PREAMBLE = 3'd2
-        ,X_ADDRESS  = 3'd3
-        ,X_DATA    = 3'd4
+         X_IDLE
+        ,X_START
+        ,X_PREAMBLE
+        ,X_ADDRESS
+        ,X_ETH_TYPE
+        ,X_DATA
     } byte_state_t;
 
     logic [3:0] proc_count_q;
@@ -83,7 +86,8 @@ module frame_decoder #(
             X_IDLE: next_state_w[i] = start_detected[i] ? X_START : X_IDLE;
             X_START: next_state_w[i] = X_PREAMBLE;
             X_PREAMBLE: next_state_w[i] = (cascase_count == 4'd6) ? X_ADDRESS : X_PREAMBLE;
-            X_ADDRESS: next_state_w[i] = (cascase_count == 4'd11) ? X_DATA : X_ADDRESS;
+            X_ADDRESS: next_state_w[i] = (cascase_count == 4'd11) ? X_ETH_TYPE : X_ADDRESS;
+            X_ETH_TYPE: next_state_w[i] = (cascase_count == 4'd1) ? X_DATA : X_ETH_TYPE;
             X_DATA: next_state_w[i] = term_detected[i] ? X_IDLE : X_DATA;
             default: next_state_w[i] = X_IDLE;
         endcase
@@ -122,7 +126,7 @@ module frame_decoder #(
     always_comb begin
     for (int i = 0; i < BYTE_LANES; i = i + 1) begin: output_tkeep
         m_axis_tkeep[i] = state_q[i] == X_DATA;
-        byte_crc_calc[i] = !is_crc_byte[i] & (m_axis_tkeep[i] | state_q[i] == X_ADDRESS);
+        byte_crc_calc[i] = !is_crc_byte[i] & (m_axis_tkeep[i] | state_q[i] == X_ADDRESS | state_q[i] == X_ETH_TYPE);
     end
         m_axis_tvalid   = | m_axis_tkeep;
         m_axis_tdata    = prev_RXD;
@@ -173,9 +177,16 @@ module frame_decoder #(
             destination_address <= {<<8{i_RXD[15:0], prev_RXD[63 : 32]}};
             source_address <= {<<8{i_RXD[63 -: 48]}};
         end
-        if (next_state_w[3] == X_ADDRESS & next_state_w[4] == X_DATA) begin
+        if (next_state_w[3] == X_ADDRESS & next_state_w[4] == X_ETH_TYPE) begin
             destination_address <= {<<8{prev_RXD[47:0]}};
             source_address <= {<<8{i_RXD[31:0], prev_RXD[63:48]}};
+        end
+
+        if (next_state_w[0] == X_ETH_TYPE) begin
+            ether_type <= {<<8{i_RXD[15:0]}};
+        end
+        else if (next_state_w[4] == X_ETH_TYPE) begin
+            ether_type <= {<<8{i_RXD[47:32]}};
         end
     end
 endmodule

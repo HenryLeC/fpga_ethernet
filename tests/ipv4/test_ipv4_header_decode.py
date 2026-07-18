@@ -54,49 +54,92 @@ def ones_complement_sum(a, b, bits=32):
 
 
 @cocotb.test()
-async def test_crc_calc(dut):
+async def test_ipv4_header_ihl5(dut):
+    await header_test(
+        dut,
+        [
+            0x45,
+            0x00,
+            0x00,
+            0x14,
+            0x12,
+            0x34,
+            0x00,
+            0x00,
+            0x40,
+            0x11,
+            0x00,
+            0x00,
+            0x01,
+            0x01,
+            0x01,
+            0x01,
+            0x0A,
+            0x00,
+            0x00,
+            0x01,
+        ],
+    )
 
+
+@cocotb.test()
+async def test_ipv4_header_ihl6(dut):
+    await header_test(
+        dut,
+        [
+            0x46,
+            0x00,
+            0x00,
+            0x14,
+            0x12,
+            0x34,
+            0x00,
+            0x00,
+            0x40,
+            0x11,
+            0x00,
+            0x00,
+            0x01,
+            0x01,
+            0x01,
+            0x01,
+            0x0A,
+            0x00,
+            0x00,
+            0x01,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+        ],
+    )
+
+
+async def header_test(dut, header):
     cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
 
     source = AxiStreamSource(
-        AxiStreamBus(dut, "s_axis"), dut.i_clk, dut.i_arst, byte_lanes=1
+        AxiStreamBus(dut, "s_axis"), dut.i_clk, dut.i_arst, byte_lanes=8
     )
 
-    header = [0x00450008, 0x34121400, 0x11400000, 0x01010000, 0x000A0101, 0x0100]
-
-    assert header[3] & 0xFFFF == 0, "Header checksum must be 0 for calculation"
+    assert header[10] | header[11] == 0, "Header checksum must be 0 for calculation"
 
     checksum = 0
-    for idx, dword in enumerate(header):
-        if idx == 0:
-            word_1 = 0
-        else:
-            word_1 = dword & 0xFFFF
-        if idx == len(header) - 1:
-            word_2 = 0
-        else:
-            word_2 = dword >> 16
+    for idx in range(0, len(header), 2):
+        word = header[idx] | (header[idx + 1] << 8)
 
-        checksum = ones_complement_sum(checksum, word_1)
-        checksum = ones_complement_sum(checksum, word_2)
+        checksum = ones_complement_sum(checksum, word)
 
     checksum = (checksum & 0xFFFF) ^ 0xFFFF
 
-    header[3] = header[3] | checksum
+    header[10] = checksum & 0xFF
+    header[11] = checksum >> 8
 
     checksum = 0
-    for idx, dword in enumerate(header):
-        if idx == 0:
-            word_1 = 0
-        else:
-            word_1 = dword & 0xFFFF
-        if idx == len(header) - 1:
-            word_2 = 0
-        else:
-            word_2 = dword >> 16
+    for idx in range(0, len(header), 2):
+        word = header[idx] | (header[idx + 1] << 8)
 
-        checksum = ones_complement_sum(checksum, word_1)
-        checksum = ones_complement_sum(checksum, word_2)
+        checksum = ones_complement_sum(checksum, word)
 
     assert checksum & 0xFFFF == 0xFFFF, f"{checksum:08x} != FFFFFFFF"
 
@@ -111,7 +154,13 @@ async def test_crc_calc(dut):
     await source.send(frame)
     await frame.tx_complete.wait()
 
-    await RisingEdge(dut.decode_done)
+    await dut.i_clk.rising_edge
+
+    assert dut.s_axis_tlast.value
+    assert dut.header_tkeep.value == 1 if len(header) % 8 else 3
+
+    if not dut.decode_done.value:
+        await RisingEdge(dut.decode_done)
 
     assert dut.packet_length.value == 20
     assert dut.identification.value == 0x1234
