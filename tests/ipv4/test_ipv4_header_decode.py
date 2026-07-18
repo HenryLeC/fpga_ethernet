@@ -167,3 +167,4 @@ async def header_test(dut, header):
     assert dut.protocol.value == 17
     assert dut.source_address.value == 0x01010101
     assert dut.destination_address.value == 0x0A000001
+    assert dut.header_valid.value

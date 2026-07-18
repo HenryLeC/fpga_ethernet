@@ -42,7 +42,7 @@ module ipv4_header_decode #(
     logic [63:0] s_axis_tdata_prev;
     logic        s_axis_tvalid_prev, s_axis_tready_prev;
     
-    logic last_dword;
+    logic last_dword, last_dword_prev;
     
     assign last_dword = s_axis_tvalid && |word_count && (word_count == (ihl >> 1) | ((word_count + 1) << 1) == ihl);
 
@@ -60,7 +60,7 @@ module ipv4_header_decode #(
 
     ones_complement_adder ones_complement_adder_3 (
         checksum_check_int_1,
-        last_dword & ihl[0] ? 0 : checksum_check_int_2,
+        last_dword_prev & ihl[0] ? 0 : checksum_check_int_2,
         checksum_check_int_3
     );
     
@@ -81,6 +81,7 @@ module ipv4_header_decode #(
         s_axis_tdata_prev <= s_axis_tdata;
         s_axis_tvalid_prev <= s_axis_tvalid;
         s_axis_tready_prev <= s_axis_tready;
+        last_dword_prev <= last_dword;
         if (!s_axis_tvalid_prev)
             checksum_check <= 0;
         else if (s_axis_tvalid_prev & s_axis_tready_prev)
