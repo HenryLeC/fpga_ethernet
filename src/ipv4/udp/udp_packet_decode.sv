@@ -5,13 +5,14 @@ module udp_packet_decode #(
     input  wire i_clk,
     input  wire i_arst,
 
-    input  wire  [31:0] s_axis_tdata,
+    input  wire  [63:0] s_axis_tdata,
+    input  wire  [ 7:0] s_axis_tkeep,
     input  wire         s_axis_tvalid,
     output logic        s_axis_tready,
     input  wire         s_axis_tlast,
 
-    output logic [31:0] m_axis_tdata,
-    output logic [ 3:0] m_axis_tkeep,
+    output logic [63:0] m_axis_tdata,
+    output logic [ 7:0] m_axis_tkeep,
     output logic        m_axis_tvalid, // TValid being asserted also means sideband is valid
     input  wire         m_axis_tready, // Unconnected (can add buffer for backpressure support)
     output logic        m_axis_tlast,
@@ -22,7 +23,6 @@ module udp_packet_decode #(
     output logic [15:0] data_length
 );
     localparam X_IDLE = 2'd0;
-    localparam X_HEAD = 2'd1;
     localparam X_DATA = 2'd2;
     localparam X_LOCK = 2'd3;
 
@@ -37,8 +37,7 @@ module udp_packet_decode #(
 
     always_comb
     case (current_state)
-        X_IDLE: next_state = s_axis_tvalid ? X_HEAD : X_IDLE;
-        X_HEAD: next_state = X_DATA;
+        X_IDLE: next_state = s_axis_tvalid ? X_DATA : X_IDLE;
         X_DATA: next_state = m_axis_tlast ? X_LOCK : X_DATA;
         X_LOCK: next_state = s_axis_tvalid ? X_LOCK : X_IDLE;
         default: next_state = X_IDLE;
@@ -49,7 +48,7 @@ module udp_packet_decode #(
     if (i_arst)
         dword_counter <= 0;
     else if (s_axis_tvalid)
-        dword_counter <= dword_counter + 4;
+        dword_counter <= dword_counter + 8;
     else
         dword_counter <= 0;
 
@@ -63,9 +62,7 @@ module udp_packet_decode #(
     X_IDLE: begin
         source_port <= {s_axis_tdata[7:0], s_axis_tdata[15:8]};
         destination_port <= {s_axis_tdata[24:16], s_axis_tdata[31:25]};
-    end
-    X_HEAD: begin
-        full_length <= {s_axis_tdata[7:0], s_axis_tdata[15:8]};
+        full_length <= {s_axis_tdata[39:32], s_axis_tdata[47:40]};
     end
     X_DATA: begin
 
@@ -83,14 +80,18 @@ module udp_packet_decode #(
         m_axis_tdata = s_axis_tdata;
         m_axis_tvalid = 1;
         case (words_left)
-        4: m_axis_tkeep = 4'b1111;
-        3: m_axis_tkeep = 4'b0111;
-        2: m_axis_tkeep = 4'b0011;
-        1: m_axis_tkeep = 4'b0001;
-        0: m_axis_tkeep = 4'b0000;
-        default: m_axis_tkeep = 4'b1111;
+        8: m_axis_tkeep = 8'b11111111;
+        7: m_axis_tkeep = 8'b01111111;
+        6: m_axis_tkeep = 8'b00111111;
+        5: m_axis_tkeep = 8'b00011111;
+        4: m_axis_tkeep = 8'b00001111;
+        3: m_axis_tkeep = 8'b00000111;
+        2: m_axis_tkeep = 8'b00000011;
+        1: m_axis_tkeep = 8'b00000001;
+        0: m_axis_tkeep = 8'b00000000;
+        default: m_axis_tkeep = 8'b11111111;
         endcase
-        m_axis_tlast = 4 >= words_left;
+        m_axis_tlast = 8 >= words_left;
     end
     default: begin
         m_axis_tdata = 0;

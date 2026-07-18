@@ -2,13 +2,14 @@ module ipv4_udp_packet_decoder (
     input wire i_clk,
     input wire i_arst,
 
-    input  wire  [31:0] s_axis_tdata,
+    input  wire  [63:0] s_axis_tdata,
+    input  wire  [ 7:0] s_axis_tkeep,
     input  wire         s_axis_tvalid,
     output logic        s_axis_tready,
     input  wire         s_axis_tlast,
 
-    output logic [31:0] m_axis_tdata,
-    output logic [ 3:0] m_axis_tkeep,
+    output logic [63:0] m_axis_tdata,
+    output logic [ 7:0] m_axis_tkeep,
     output logic        m_axis_tvalid,
     input  wire         m_axis_tready,
     output logic        m_axis_tlast,
@@ -38,25 +39,29 @@ module ipv4_udp_packet_decoder (
     endcase
 
     wire header_tvalid, header_tready, header_tlast;
-    wire [31:0] header_tdata;
+    wire [63:0] header_tdata;
+    wire [ 1:0] header_tkeep;
     wire data_tvalid, data_tready, data_tlast;
-    wire [31:0] data_tdata;
-
+    wire [63:0] data_tdata;
+    wire [ 7:0] data_tkeep;
     ipv4_header_remove header_remove_inst (
         .i_clk(i_clk),
         .i_arst(i_arst),
 
         .s_axis_tdata(s_axis_tdata),
+        .s_axis_tkeep(s_axis_tkeep),
         .s_axis_tvalid(s_axis_tvalid),
         .s_axis_tready(s_axis_tready),
         .s_axis_tlast(s_axis_tlast),
 
         .header_axis_tdata(header_tdata),
+        .header_axis_tkeep(header_tkeep),
         .header_axis_tvalid(header_tvalid),
         .header_axis_tready(header_tready),
         .header_axis_tlast(header_tlast),
 
         .data_axis_tdata(data_tdata),
+        .data_axis_tkeep(data_tkeep),
         .data_axis_tvalid(data_tvalid),
         .data_axis_tready(data_tready),
         .data_axis_tlast(data_tlast)
@@ -70,6 +75,8 @@ module ipv4_udp_packet_decoder (
         .s_axis_tvalid(header_tvalid),
         .s_axis_tready(header_tready),
         .s_axis_tlast(header_tlast),
+
+        .header_tkeep(header_tkeep),
 
         .decode_done(header_done),
         .header_valid(header_valid),
@@ -88,6 +95,7 @@ module ipv4_udp_packet_decoder (
         .i_arst(i_arst | (current_state == X_LOCK)),
 
         .s_axis_tdata(data_tdata),
+        .s_axis_tkeep(data_tkeep),
         .s_axis_tvalid(data_tvalid),
         .s_axis_tready(data_tready),
         .s_axis_tlast(data_tlast),
